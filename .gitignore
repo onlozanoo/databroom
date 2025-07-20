@@ -1,0 +1,9 @@
+.claude
+.github
+docs
+examples   
+.env
+.env.*
+CLAUDE.md
+CONTRIBUTING.md
+Maekfile
