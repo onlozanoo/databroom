@@ -45,15 +45,23 @@ Handling missing values, inconsistent column names, and mismatched data types is
 
 ```
 janitor_bot/
-├── core/                # Language‑agnostic cleaning logic
-│   ├── cleaning_ops.py  # Individual operations
-│   └── report.py        # HTML/Rich reports
-├── generators/          # Code template engines
+├── core/                # Core cleaning engine
+│   ├── command.py       # ✅ CleaningCommand decorator for operation tracking
+│   ├── pipeline.py      # ✅ CleaningPipeline for operation coordination  
+│   ├── cleaning_ops.py  # ✅ Individual cleaning operations (remove_empty_cols, etc.)
+│   ├── janitor.py       # 🔄 Main user-friendly API (in progress)
+│   └── report.py        # 📋 HTML/Rich reports (planned)
+├── generators/          # Code template engines (planned)
+│   ├── base.py          # Abstract generator interface
 │   ├── python.py        # pandas templates (Jinja2)
-│   └── r.py             # tidyverse templates (glue)
-├── gui/                 # Streamlit app
-├── cli/                 # Typer‑based command‑line interface
-└── tests/               # Unit & integration tests
+│   ├── r.py             # tidyverse templates (glue)
+│   └── templates.py     # Template storage
+├── gui/                 # Streamlit app (planned)
+│   ├── app.py           # Main Streamlit interface
+│   ├── components.py    # Reusable UI components
+│   └── state.py         # Session state management
+├── cli/                 # Typer‑based command‑line interface (planned)
+└── tests/               # Unit & integration tests (planned)
 ```
 
 ---
@@ -67,11 +75,31 @@ git clone https://github.com/<your‑user>/janitor_bot.git && cd janitor_bot
 # 2. Create and activate a virtual environment
 python -m venv venv && source venv/bin/activate
 
-# 3. Install dependencies (including development extras)
-pip install -e .[dev]
+# 3. Install dependencies
+pip install pandas numpy
 
-# 4. Launch the GUI
-streamlit run janitor_bot/gui/app.py
+# 4. Test current functionality
+python pruebas.py
+```
+
+### **Current Working Example**
+
+```python
+from janitor_bot.core import pipeline
+import pandas as pd
+
+# Create sample data
+data = {'A': [1, 2, None, 4], 'B': [None, None, None, None], 'C': [5, 6, 7, 8]}
+df = pd.DataFrame(data)
+
+# Use CleaningPipeline
+cleaner = pipeline.CleaningPipeline(df)
+cleaner.execute_operation('remove_empty_cols', threshold=0.5)
+cleaner.execute_operation('standarize_column_names')
+
+# Get results
+cleaned_df = cleaner.get_current_dataframe()
+history = cleaner.get_history()
 ```
 
 ---
@@ -91,10 +119,10 @@ streamlit run janitor_bot/gui/app.py
 ## 📋 Implementation Plan
 
 ### **PHASE 1: Foundation (Core Basics)**
-1. **CleaningCommand** - Simple structure to register operations
-2. **CleaningPipeline** - Command list + basic methods (add, execute)
-3. **CleaningOperations** - 2-3 basic functions (remove_empty_cols, standardize_names)
-4. **Janitor** - Main class with 2-3 methods using the above
+1. **CleaningCommand** - ✅ **COMPLETED** - Decorator for automatic operation tracking
+2. **CleaningPipeline** - ✅ **COMPLETED** - Operation coordination with history tracking
+3. **CleaningOperations** - ✅ **COMPLETED** - Basic functions (remove_empty_cols, standardize_names, remove_empty_rows)
+4. **Janitor** - 🔄 **IN PROGRESS** - User-friendly chainable API
 
 ### **PHASE 2: Code Generation**
 5. **Base Generator** - Abstract class with common interface

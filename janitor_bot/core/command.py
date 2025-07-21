@@ -9,7 +9,7 @@ from datetime import datetime
 import pandas as pd
 
 
-def CleaningCommand(function=None, *, history_list=None):
+def CleaningCommand(function=None, history_list=None):
     """
     Decorator that automatically tracks DataFrame cleaning operations.
     
@@ -77,7 +77,7 @@ def CleaningCommand(function=None, *, history_list=None):
                 # Create comprehensive log entry
                 log_entry = (
                     f"{timestamp} - {func.__name__} called. "
-                    f"Parameters: {args}, {kwargs}{shape_info}"
+                    f"Parameters: {kwargs}{shape_info}"
                 )
                 history_list.append(log_entry)
             
@@ -89,8 +89,4 @@ def CleaningCommand(function=None, *, history_list=None):
         wrapper.__doc__ = func.__doc__
         return wrapper
     
-    # Handle both @CleaningCommand and @CleaningCommand(history_list=...)
-    if function is None:
-        return decorator
-    else:
-        return decorator(function)
+    return decorator(function)

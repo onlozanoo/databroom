@@ -7,3 +7,7 @@ examples
 CLAUDE.md
 CONTRIBUTING.md
 Maekfile
+env
+pruebas.py
+test*
+__pycache__
