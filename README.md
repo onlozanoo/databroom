@@ -70,17 +70,22 @@ janitor_bot/
 
 ```bash
 # 1. Clone
-git clone https://github.com/<your‑user>/janitor_bot.git && cd janitor_bot
+git clone https://github.com/<onlozanoo/janitor_bot.git && cd janitor_bot
 
 # 2. Create and activate a virtual environment
 python -m venv venv && source venv/bin/activate
 
 # 3. Install dependencies
-pip install pandas numpy
+pip install -r requirements.txt
 
-# 4. Test current functionality
+# 4a. Launch the GUI (recommended)
+streamlit run janitor_bot/gui/app.py
+
+# 4b. OR test programmatic API
 python pruebas.py
 ```
+
+**GUI Instructions**: The web app will open at `http://localhost:8501`. Upload your CSV/Excel/JSON file, adjust parameters, click operation buttons, and download results.
 
 ### **Current Working Examples**
 
@@ -157,9 +162,9 @@ print(cleaned.get_df())
 7. **Templates Storage** - Centralized dictionary of templates
 
 ### **PHASE 3: Minimal Viable GUI**
-8. **Streamlit App** - File upload + basic preview
-9. **GUI Components** - Checkboxes for basic operations
-10. **State Management** - Connection between GUI and Janitor
+8. **Streamlit App** - ✅ **COMPLETED** - File upload, data preview, interactive cleaning operations
+9. **GUI Components** - ✅ **COMPLETED** - Operation buttons with parameter controls and history tracking
+10. **State Management** - ✅ **COMPLETED** - Session state management with synchronized history
 
 ### **PHASE 4: Integration and Export**
 11. **Code Export** - Button that generates and downloads scripts
