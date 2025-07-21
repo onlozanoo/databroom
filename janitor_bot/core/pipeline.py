@@ -1,6 +1,6 @@
 # pipeline.py
 
-from janitor_bot.core.command import CleaningCommand
+from janitor_bot.core.history_tracker import CleaningCommand
 from janitor_bot.core import cleaning_ops
 import inspect
 

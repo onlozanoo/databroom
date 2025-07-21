@@ -46,7 +46,7 @@ Handling missing values, inconsistent column names, and mismatched data types is
 ```
 janitor_bot/
 ├── core/                # Core cleaning engine
-│   ├── command.py       # ✅ CleaningCommand decorator for operation tracking
+│   ├── history_tracker.py # ✅ CleaningCommand decorator for operation tracking
 │   ├── pipeline.py      # ✅ CleaningPipeline for operation coordination  
 │   ├── cleaning_ops.py  # ✅ Individual cleaning operations (remove_empty_cols, etc.)
 │   ├── janitor.py       # 🔄 Main user-friendly API (in progress)
@@ -119,7 +119,7 @@ history = cleaner.get_history()
 ## 📋 Implementation Plan
 
 ### **PHASE 1: Foundation (Core Basics)**
-1. **CleaningCommand** - ✅ **COMPLETED** - Decorator for automatic operation tracking
+1. **HistoryTracker** - ✅ **COMPLETED** - Decorator for automatic operation tracking
 2. **CleaningPipeline** - ✅ **COMPLETED** - Operation coordination with history tracking
 3. **CleaningOperations** - ✅ **COMPLETED** - Basic functions (remove_empty_cols, standardize_names, remove_empty_rows)
 4. **Janitor** - 🔄 **IN PROGRESS** - User-friendly chainable API
