@@ -11,3 +11,4 @@ env
 pruebas.py
 test*
 __pycache__
+logs
