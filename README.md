@@ -49,7 +49,7 @@ janitor_bot/
 │   ├── history_tracker.py # ✅ CleaningCommand decorator for operation tracking
 │   ├── pipeline.py      # ✅ CleaningPipeline for operation coordination  
 │   ├── cleaning_ops.py  # ✅ Individual cleaning operations (remove_empty_cols, etc.)
-│   ├── janitor.py       # 🔄 Main user-friendly API (in progress)
+│   ├── janitor.py       # ✅ Main user-friendly API with factory methods
 │   └── report.py        # 📋 HTML/Rich reports (planned)
 ├── generators/          # Code template engines (planned)
 │   ├── base.py          # Abstract generator interface
@@ -82,37 +82,64 @@ pip install pandas numpy
 python pruebas.py
 ```
 
-### **Current Working Example**
+### **Current Working Examples**
 
+#### **Basic Usage with Manual Data**
 ```python
-from janitor_bot.core import pipeline
+from janitor_bot.core.janitor import Janitor
 import pandas as pd
 
 # Create sample data
-data = {'A': [1, 2, None, 4], 'B': [None, None, None, None], 'C': [5, 6, 7, 8]}
+data = {'Column Name': [1, 2, None, 4], 'Empty Col': [None, None, None, None], 'Data': [5, 6, 7, 8]}
 df = pd.DataFrame(data)
 
-# Use CleaningPipeline
-cleaner = pipeline.CleaningPipeline(df)
-cleaner.execute_operation('remove_empty_cols', threshold=0.5)
-cleaner.execute_operation('standarize_column_names')
+# Use Janitor with method chaining
+janitor = Janitor(df)
+result = janitor.remove_empty_cols(threshold=0.5).standarize_column_names().normalize_column_names()
 
 # Get results
-cleaned_df = cleaner.get_current_dataframe()
-history = cleaner.get_history()
+cleaned_df = result.get_df()
+history = result.get_history()
 ```
+
+#### **File Loading with Factory Methods**
+```python
+from janitor_bot.core.janitor import Janitor
+
+# Load from CSV file
+janitor = Janitor.from_csv('data.csv', encoding='utf-8')
+
+# Or auto-detect file type
+janitor = Janitor.from_file('data.xlsx')
+
+# Chain multiple operations
+cleaned = janitor.remove_empty_cols().standarize_column_names().normalize_values().standarize_values()
+
+print(cleaned.get_df())
+```
+
+#### **Available Cleaning Operations**
+- `remove_empty_cols(threshold=0.9)` - Remove columns with high missing values
+- `remove_empty_rows()` - Remove completely empty rows
+- `standarize_column_names()` - Convert to lowercase, replace spaces with underscores
+- `normalize_column_names()` - Remove accents and special characters
+- `normalize_values()` - Remove accents from all text values
+- `standarize_values(columns=None)` - Lowercase + underscore replacement for values
 
 ---
 
-## 🛣️ Roadmap
 
-| Milestone             | Version | Target Month | Highlights                                                                      |
-| --------------------- | ------- | ------------ | ------------------------------------------------------------------------------- |
-| **MVP**               | `v0.1`  | Aug 2025     | Core cleaning operations, Streamlit GUI, Python code export, basic tests        |
-| **Bilingual Release** | `v0.2`  | Sep 2025     | R/tidyverse code generator, language toggle in UI, extended report capabilities |
-| **Recipes & Presets** | `v0.3`  | Oct 2025     | Save/load cleaning pipelines, column‑specific rules                             |
-| **Plugin System**     | `v0.4`  | Dec 2025     | Third‑party cleaning operations, Great Expectations integration                 |
-| **Cloud Mode**        | `v1.0`  | Q1 2026      | Multi‑user hosting, authentication, job history, SQL & Spark exporters          |
+## 🛣️ Roadmap
+
+| Milestone                 | Version | Target Month | Highlights                                                                 |
+|--------------------------|---------|---------------|---------------------------------------------------------------------------|
+| **MVP**                  | `v0.1`  | —             | Core cleaning operations, Streamlit GUI, Python code export, basic tests |
+| **Bilingual Release**    | `v0.4`  | —             | R/tidyverse code generator, language toggle in UI, extended report capabilities |
+| **Recipes & Rules**      | `v0.5`  | —             | Save/load cleaning pipelines, column-specific rules, cleaning presets     |
+| **Extensibility Light**  | `v0.8`  | —             | User-defined cleaning functions, external Python snippet support          |
+| **Data Audits**          | `v1.0`  | —             | Great Expectations integration, basic validation reports                  |
+| **Export Mastery**       | `v1.5`  | —             | SQL & PySpark exporters, YAML pipeline export, no infrastructure required |
+| **(Optional) Cloud Mode**| `v2.0`  | —             | Multi-user hosting, authentication, job history, full SaaS deployment     |
 
 ---
 
@@ -121,8 +148,8 @@ history = cleaner.get_history()
 ### **PHASE 1: Foundation (Core Basics)**
 1. **HistoryTracker** - ✅ **COMPLETED** - Decorator for automatic operation tracking
 2. **CleaningPipeline** - ✅ **COMPLETED** - Operation coordination with history tracking
-3. **CleaningOperations** - ✅ **COMPLETED** - Basic functions (remove_empty_cols, standardize_names, remove_empty_rows)
-4. **Janitor** - 🔄 **IN PROGRESS** - User-friendly chainable API
+3. **CleaningOperations** - ✅ **COMPLETED** - 7 functions (remove_empty_cols/rows, standardize/normalize names/values)
+4. **Janitor** - ✅ **COMPLETED** - User-friendly chainable API with file loading factory methods
 
 ### **PHASE 2: Code Generation**
 5. **Base Generator** - Abstract class with common interface

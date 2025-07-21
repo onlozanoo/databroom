@@ -10,6 +10,7 @@ avaiable_functions = [name for name, obj in inspect.getmembers(cleaning_ops, ins
 class CleaningPipeline:
     def __init__(self, df):
         self.df = df
+        self.df_original = df.copy() # Store the original DataFrame
         self.operations = avaiable_functions
         self.history_list = []
     
