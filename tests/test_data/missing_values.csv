@@ -1,0 +1,6 @@
+name,age,city,salary,empty_col,mostly_empty
+Alice,25,New York,50000,,
+Bob,,London,60000,,
+Charlie,35,,75000,,1
+Diana,28,Tokyo,,,
+,35,Berlin,55000,,

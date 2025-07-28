@@ -9,7 +9,7 @@ CONTRIBUTING.md
 Maekfile
 env
 pruebas.py
-test*
 __pycache__
 logs
 CLAUDE.md.save
+test_generated_pipeline.py
