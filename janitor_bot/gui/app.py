@@ -33,6 +33,47 @@ def main():
             width: 100%;
             border-radius: 6px;
         }
+        
+        /* Warning buttons styling for step back and reset */
+        .stButton > button[kind="secondary"] {
+            background-color: #ff6b6b !important;
+            color: white !important;
+            border: 2px solid #ff5252 !important;
+            font-weight: 600 !important;
+        }
+        
+        .stButton > button[kind="secondary"]:hover {
+            background-color: #ff5252 !important;
+            border-color: #e53935 !important;
+            box-shadow: 0 4px 8px rgba(255, 107, 107, 0.3) !important;
+        }
+        
+        .stButton > button[kind="secondary"]:active {
+            background-color: #e53935 !important;
+            transform: translateY(1px) !important;
+        }
+        
+        /* Specific styling for step back button (orange warning) */
+        .stButton > button[data-testid="baseButton-secondary"]:has([data-testid*="step-back"]) {
+            background-color: #ffa726 !important;
+            color: white !important;
+            border: 2px solid #ff9800 !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Specific styling for reset button (red warning) */
+        .stButton > button[data-testid="baseButton-secondary"]:has([data-testid*="reset"]) {
+            background-color: #ef5350 !important;
+            color: white !important;
+            border: 2px solid #f44336 !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Enhanced hover effects for warning buttons */
+        .stButton > button[data-testid="baseButton-secondary"]:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            transform: translateY(-1px) !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -52,9 +93,6 @@ def main():
     if 'uploaded_file_name' not in st.session_state:
         st.session_state.uploaded_file_name = None
         debug_log("Initialized uploaded_file_name in session state", "GUI")
-    if 'last_interaction' not in st.session_state:
-        st.session_state.last_interaction = None
-        debug_log("Initialized last_interaction in session state", "GUI")
     
     debug_log(f"Current session state - janitor: {st.session_state.janitor is not None}, history_length: {len(st.session_state.cleaning_history)}", "GUI")
     
@@ -110,72 +148,28 @@ def main():
             with col1:
                 # Step back button
                 can_step_back = st.session_state.janitor.can_step_back()
-                confirm_step_back = st.session_state.get('confirm_step_back', False)
                 
-                # Reset confirmation if user interacted with something else
-                if st.session_state.last_interaction not in [None, 'step_back'] and confirm_step_back:
-                    st.session_state.confirm_step_back = False
-                    confirm_step_back = False
+                if can_step_back:
+                    st.caption("⚠️ This will undo your last cleaning operation")
                 
-                button_text = "⚠️ Press again to confirm" if confirm_step_back else "↶ Step Back"
-                button_help = "Press again to confirm step back" if confirm_step_back else "Undo last operation"
-                
-                if st.button(button_text, help=button_help, use_container_width=True, disabled=not can_step_back):
-                    debug_log("Step back button clicked", "GUI")
-                    st.session_state.last_interaction = 'step_back'
-                    
-                    if confirm_step_back:
-                        # Execute step back
-                        debug_log(f"Before step back - History length: {len(st.session_state.cleaning_history)}", "GUI")
-                        try:
-                            st.session_state.janitor.step_back()
-                            # Sync session state with pipeline
-                            st.session_state.cleaning_history = st.session_state.janitor.get_history().copy()
-                            debug_log(f"Step back completed - New history length: {len(st.session_state.cleaning_history)}", "GUI")
-                            st.success("↶ Stepped back to previous state")
-                            st.session_state.confirm_step_back = False
-                            st.session_state.last_interaction = None
-                            st.rerun()
-                        except ValueError as e:
-                            debug_log(f"Step back failed: {e}", "GUI")
-                            st.error(f"Cannot step back: {e}")
-                            st.session_state.confirm_step_back = False
-                            st.session_state.last_interaction = None
-                    else:
-                        # Set confirmation flag
-                        st.session_state.confirm_step_back = True
+                if st.button("↶ Step Back", help="Undo last operation", use_container_width=True, disabled=not can_step_back, type="secondary", key="step-back-btn"):
+                    try:
+                        st.session_state.janitor.step_back()
+                        st.session_state.cleaning_history = st.session_state.janitor.get_history().copy()
+                        st.success("↶ Stepped back to previous state")
                         st.rerun()
+                    except ValueError as e:
+                        st.error(f"Cannot step back: {e}")
             
             with col2:
                 # Reset button
-                confirm_reset = st.session_state.get('confirm_reset', False)
+                st.caption("⚠️ This will reset all changes to original data")
                 
-                # Reset confirmation if user interacted with something else
-                if st.session_state.last_interaction not in [None, 'reset'] and confirm_reset:
-                    st.session_state.confirm_reset = False
-                    confirm_reset = False
-                
-                button_text = "⚠️ Press again to confirm" if confirm_reset else "🔄 Reset to Original"
-                button_help = "Press again to confirm reset" if confirm_reset else "Reset DataFrame to original state"
-                
-                if st.button(button_text, help=button_help, use_container_width=True):
-                    debug_log("Reset button clicked", "GUI")
-                    st.session_state.last_interaction = 'reset'
-                    
-                    if confirm_reset:
-                        # Execute reset
-                        debug_log(f"Before reset - History length: {len(st.session_state.cleaning_history)}", "GUI")
-                        st.session_state.janitor.reset()
-                        st.session_state.cleaning_history = []
-                        debug_log("Reset completed - DataFrame and history cleared", "GUI")
-                        st.success("🔄 Reset to original state")
-                        st.session_state.confirm_reset = False
-                        st.session_state.last_interaction = None
-                        st.rerun()
-                    else:
-                        # Set confirmation flag
-                        st.session_state.confirm_reset = True
-                        st.rerun()
+                if st.button("🔄 Reset to Original", help="Reset DataFrame to original state", use_container_width=True, type="secondary", key="reset-btn"):
+                    st.session_state.janitor.reset()
+                    st.session_state.cleaning_history = []
+                    st.success("🔄 Reset to original state")
+                    st.rerun()
             
             st.markdown("---")
 
