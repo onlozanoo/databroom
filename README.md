@@ -10,16 +10,16 @@ Handling missing values, inconsistent column names, and mismatched data types is
 
 ---
 
-## ✨ Features (MVP)
+## ✨ Features (Current Status)
 
-| Area           | Capability                                                                                                  |
-| -------------- | ----------------------------------------------------------------------------------------------------------- |
-| **GUI**        | Streamlit interface with file upload, live preview, and checkbox‑driven cleaning wizard                     |
-| **Core API**   | Chainable `Janitor()` class (`.remove_empty_cols() → .standardize_column_names() → …`)                      |
-| **Export**     | Generate & download *either* a Python script **or** an R script that reproduces the selected cleaning steps |
-| **Reporting**  | One‑page HTML summary (missing values, type casts, outliers flagged)                                        |
-| **CLI**        | `janitor-bot clean data.csv --lang py` for headless pipelines                                               |
-| **Tests + CI** | Pytest suite & GitHub Actions on every pull request                                                         |
+| Area           | Capability                                                                                                  | Status |
+| -------------- | ----------------------------------------------------------------------------------------------------------- | ------ |
+| **GUI**        | Streamlit interface with file upload, live preview, and interactive cleaning operations                     | ✅ **COMPLETED** |
+| **Core API**   | Chainable `Janitor()` class (`.remove_empty_cols() → .standardize_column_names() → …`)                      | ✅ **COMPLETED** |
+| **Export**     | Generate & download Python scripts that reproduce all cleaning operations                                   | ✅ **COMPLETED** |
+| **Reporting**  | One‑page HTML summary (missing values, type casts, outliers flagged)                                        | 📋 **PLANNED** |
+| **CLI**        | `janitor-bot clean data.csv --lang py` for headless pipelines                                               | 📋 **PLANNED** |
+| **R Export**   | R/tidyverse code generation                                                                                 | 📋 **PLANNED** |
 
 ---
 
@@ -51,15 +51,14 @@ janitor_bot/
 │   ├── cleaning_ops.py  # ✅ Individual cleaning operations (remove_empty_cols, etc.)
 │   ├── janitor.py       # ✅ Main user-friendly API with factory methods
 │   └── report.py        # 📋 HTML/Rich reports (planned)
-├── generators/          # Code template engines (planned)
-│   ├── base.py          # Abstract generator interface
-│   ├── python.py        # pandas templates (Jinja2)
-│   ├── r.py             # tidyverse templates (glue)
-│   └── templates.py     # Template storage
-├── gui/                 # Streamlit app (planned)
-│   ├── app.py           # Main Streamlit interface
-│   ├── components.py    # Reusable UI components
-│   └── state.py         # Session state management
+├── generators/          # Code template engines
+│   ├── base.py          # ✅ Code generator with Jinja2 templates
+│   └── templates/       # ✅ Jinja2 templates for Python/R
+│       ├── python_pipeline.py.j2  # ✅ Complete Python script template
+│       ├── R_pipeline.R.j2         # 📋 R script template (placeholder)
+│       └── macros.j2              # ✅ Reusable template components
+├── gui/                 # Streamlit app
+│   └── app.py           # ✅ Complete GUI with export functionality
 ├── cli/                 # Typer‑based command‑line interface (planned)
 └── tests/               # Unit & integration tests (planned)
 ```
@@ -85,7 +84,16 @@ streamlit run janitor_bot/gui/app.py
 python pruebas.py
 ```
 
-**GUI Instructions**: The web app will open at `http://localhost:8501`. Upload your CSV/Excel/JSON file, adjust parameters, click operation buttons, and download results.
+**GUI Instructions**: The web app will open at `http://localhost:8501`. Upload your CSV/Excel/JSON file, perform cleaning operations using the sidebar buttons, view results in real-time, and export Python code from the "Export Code" tab.
+
+### **🎯 What's Working Now**
+
+✅ **Complete GUI Workflow**: Upload → Clean → Preview → Export  
+✅ **Code Generation**: Full Python scripts with imports, file loading, and operations  
+✅ **Interactive Operations**: Remove empty columns/rows, standardize/normalize names/values  
+✅ **Real-time Preview**: See changes immediately in the GUI  
+✅ **History Tracking**: All operations logged and reproducible  
+✅ **File Support**: CSV, Excel (.xlsx/.xls), and JSON files  
 
 ### **Current Working Examples**
 
@@ -157,9 +165,9 @@ print(cleaned.get_df())
 4. **Janitor** - ✅ **COMPLETED** - User-friendly chainable API with file loading factory methods
 
 ### **PHASE 2: Code Generation**
-5. **Base Generator** - Abstract class with common interface
-6. **Python Generator** - Basic templates for Phase 1 operations
-7. **Templates Storage** - Centralized dictionary of templates
+5. **Base Generator** - ✅ **COMPLETED** - Code generator with Jinja2 templates  
+6. **Python Generator** - ✅ **COMPLETED** - Complete Python script generation with imports and file loading
+7. **Templates Storage** - ✅ **COMPLETED** - Jinja2 templates with macros and dynamic content
 
 ### **PHASE 3: Minimal Viable GUI**
 8. **Streamlit App** - ✅ **COMPLETED** - File upload, data preview, interactive cleaning operations
@@ -167,9 +175,9 @@ print(cleaned.get_df())
 10. **State Management** - ✅ **COMPLETED** - Session state management with synchronized history
 
 ### **PHASE 4: Integration and Export**
-11. **Code Export** - Button that generates and downloads scripts
-12. **Basic Testing** - Tests for core functions
-13. **Basic CLI** - Simple command for headless usage
+11. **Code Export** - ✅ **COMPLETED** - GUI tab with automatic preview and download of Python scripts
+12. **Basic Testing** - 📋 **PENDING** - Tests for core functions
+13. **Basic CLI** - 📋 **PENDING** - Simple command for headless usage
 
 ### **PHASE 5: Expansion**
 14. **More Operations** - Add remaining cleaning functions
@@ -186,7 +194,7 @@ Start with **PHASE 1** - A solid core foundation allows everything else to work 
 
 ## 🤝 Contributing
 
-We welcome contributions of all kinds. Please see `CONTRIBUTING.md` for guidelines on setting up the development environment, running tests, and submitting pull requests.
+I welcome contributions of all kinds.
 
 ---
 
@@ -199,4 +207,3 @@ This project is licensed under the MIT License.
 ## 🧭 Acknowledgements
 
 Janitor Bot is inspired by the daily need to keep data pipelines reliable and maintainable. Thank you to the open‑source community for providing the tools that make this project possible.
-

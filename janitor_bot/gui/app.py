@@ -8,6 +8,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from janitor_bot.core.janitor import Janitor
 from janitor_bot.core.debug_logger import debug_log, get_current_log_file
+from janitor_bot.generators.base import CodeGenerator
 
 def main():
     debug_log("Starting Janitor Bot application", "GUI")
@@ -269,7 +270,7 @@ def main():
     # Main content area
     if st.session_state.janitor is not None:
         # Tabs for different views
-        tab1, tab2, tab3 = st.tabs(["📊 Current Data", "📝 History", "🔍 Data Info"])
+        tab1, tab2, tab3, tab4 = st.tabs(["📊 Current Data", "📝 History", "🔍 Data Info", "💾 Export Code"])
         
         with tab1:
             st.subheader("Current DataFrame")
@@ -331,6 +332,70 @@ def main():
             # Sample values
             st.write("**Sample Values:**")
             st.dataframe(current_df.head(10), use_container_width=True)
+        
+        with tab4:
+            st.subheader("Export Cleaned Code")
+            
+            if len(st.session_state.cleaning_history) > 0:
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown("### 🐍 Python/Pandas")
+                    
+                    # Always show preview if operations exist
+                    try:
+                        debug_log("Generating Python code preview", "GUI")
+                        generator = CodeGenerator('python')
+                        history = st.session_state.janitor.get_history()
+                        generator.load_history(history)
+                        code = generator.generate_code()
+                        
+                        # Generate complete code with imports and file loading
+                        from datetime import datetime
+                        from jinja2 import Environment, FileSystemLoader
+                        from pathlib import Path
+                        
+                        templates_dir = Path(__file__).parent.parent / "generators" / "templates"
+                        env = Environment(loader=FileSystemLoader(str(templates_dir)))
+                        template = env.get_template("python_pipeline.py.j2")
+                        
+                        # Use actual filename if available
+                        filename = st.session_state.uploaded_file_name or "your_data_file.csv"
+                        
+                        context = {
+                            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "steps": code,
+                            "filename": filename
+                        }
+                        
+                        full_script = template.render(context)
+                        
+                        # Show preview
+                        st.code(full_script, language='python')
+                        
+                        # Download button
+                        st.download_button(
+                            label="📥 Download Python Script",
+                            data=full_script,
+                            file_name="janitor_cleaning_pipeline.py",
+                            mime="text/plain"
+                        )
+                        
+                    except Exception as e:
+                        debug_log(f"Error generating Python code: {e}", "GUI")
+                        st.error(f"Error generating code: {e}")
+                    
+                    if st.button("🔄 Refresh Code", help="Regenerate the code preview"):
+                        st.rerun()
+                
+                with col2:
+                    st.markdown("### 📊 R/Tidyverse")
+                    if st.button("Generate R Code", help="R/Tidyverse code generation - Coming Soon!", disabled=True):
+                        st.info("🚧 R code generation coming in future updates!")
+                    
+                    st.info("🔜 R/Tidyverse support coming soon!")
+            else:
+                st.info("Perform some cleaning operations first to generate exportable code.")
     
     else:
         # Welcome screen

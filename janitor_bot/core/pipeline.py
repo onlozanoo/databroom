@@ -5,15 +5,15 @@ from janitor_bot.core.debug_logger import debug_log
 from janitor_bot.core import cleaning_ops
 import inspect
 
-# Obtener los nombres de las funciones en cleaning_ops
-avaiable_functions = [name for name, obj in inspect.getmembers(cleaning_ops, inspect.isfunction)]
+# Get the function names in cleaning_ops
+available_functions = [name for name, obj in inspect.getmembers(cleaning_ops, inspect.isfunction)]
 
 class CleaningPipeline:
     def __init__(self, df):
         debug_log(f"Initializing CleaningPipeline with DataFrame shape: {df.shape}", "PIPELINE")
         self.df = df
         self.df_original = df.copy() # Store the original DataFrame
-        self.operations = avaiable_functions
+        self.operations = available_functions
         self.history_list = []
         debug_log(f"Pipeline initialized with {len(self.operations)} operations: {self.operations}", "PIPELINE")
         debug_log(f"Original DataFrame stored - Shape: {self.df_original.shape}", "PIPELINE")
