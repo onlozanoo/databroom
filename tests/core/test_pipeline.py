@@ -78,7 +78,7 @@ class TestCleaningPipelineOperations:
         original_shape = pipeline.df.shape
         
         # Act
-        pipeline.execute_operation('standarize_column_names')
+        pipeline.execute_operation('standardize_column_names')
         
         # Assert
         # Column names should be different now
@@ -91,7 +91,7 @@ class TestCleaningPipelineHistory:
         """Test that get_history returns a copy."""
         # Arrange
         pipeline = CleaningPipeline(sample_clean_data)
-        pipeline.execute_operation('standarize_column_names')
+        pipeline.execute_operation('standardize_column_names')
         
         # Act
         history1 = pipeline.get_history()
@@ -110,7 +110,7 @@ class TestCleaningPipelineHistory:
         # Act & Assert
         assert pipeline.get_operation_count() == 0
         
-        pipeline.execute_operation('standarize_column_names')
+        pipeline.execute_operation('standardize_column_names')
         assert pipeline.get_operation_count() == 1
         
         pipeline.execute_operation('normalize_column_names')
@@ -123,14 +123,14 @@ class TestCleaningPipelineHistory:
         
         # Act
         pipeline.execute_operation('remove_empty_cols', threshold=0.9)
-        pipeline.execute_operation('standarize_column_names')
+        pipeline.execute_operation('standardize_column_names')
         pipeline.execute_operation('normalize_column_names')
         
         # Assert
         history = pipeline.get_history()
         assert len(history) == 3
         assert any('remove_empty_cols' in h for h in history)
-        assert any('standarize_column_names' in h for h in history)
+        assert any('standardize_column_names' in h for h in history)
         assert any('normalize_column_names' in h for h in history)
 
 class TestCleaningPipelineDataAccess:
@@ -170,7 +170,7 @@ class TestCleaningPipelineAvailableOperations:
         assert len(pipeline.operations) > 0
         assert isinstance(pipeline.operations, list)
 
-    @pytest.mark.skip(reason="Función standardize_column_names no existe - usar standarize")
+    @pytest.mark.skip(reason="Función standardize_column_names implementada correctamente")
     def test_operations_contain_expected_functions(self, sample_clean_data):
         """Test that operations list contains expected cleaning functions."""
         # Arrange
@@ -180,7 +180,7 @@ class TestCleaningPipelineAvailableOperations:
         expected_operations = [
             'remove_empty_cols',
             'remove_empty_rows',
-            'standarize_column_names',  # Corrected spelling
+            'standardize_column_names',
             'normalize_column_names'
         ]
         
@@ -195,7 +195,7 @@ class TestCleaningPipelineEdgeCases:
         pipeline = CleaningPipeline(empty_dataframe)
         
         # Act & Assert - should not raise exceptions
-        result = pipeline.execute_operation('standarize_column_names')
+        result = pipeline.execute_operation('standardize_column_names')
         assert result.shape == (0, 0)
         assert len(pipeline.history_list) == 1
 
@@ -206,7 +206,7 @@ class TestCleaningPipelineEdgeCases:
         pipeline = CleaningPipeline(df)
         
         # Act
-        result = pipeline.execute_operation('standarize_column_names')
+        result = pipeline.execute_operation('standardize_column_names')
         
         # Assert
         assert result.shape[1] == 1

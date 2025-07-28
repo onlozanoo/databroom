@@ -121,7 +121,7 @@ df = pd.DataFrame(data)
 
 # Use Janitor with method chaining
 janitor = Janitor(df)
-result = janitor.remove_empty_cols(threshold=0.5).standarize_column_names().normalize_column_names()
+result = janitor.remove_empty_cols(threshold=0.5).standardize_column_names().normalize_column_names()
 
 # Get results
 cleaned_df = result.get_df()
@@ -139,7 +139,7 @@ janitor = Janitor.from_csv('data.csv', encoding='utf-8')
 janitor = Janitor.from_file('data.xlsx')
 
 # Chain multiple operations
-cleaned = janitor.remove_empty_cols().standarize_column_names().normalize_values().standarize_values()
+cleaned = janitor.remove_empty_cols().standardize_column_names().normalize_values().standardize_values()
 
 print(cleaned.get_df())
 ```
@@ -147,10 +147,10 @@ print(cleaned.get_df())
 #### **Available Cleaning Operations**
 - `remove_empty_cols(threshold=0.9)` - Remove columns with high missing values
 - `remove_empty_rows()` - Remove completely empty rows
-- `standarize_column_names()` - Convert to lowercase, replace spaces with underscores
+- `standardize_column_names()` - Convert to lowercase, replace spaces with underscores
 - `normalize_column_names()` - Remove accents and special characters
 - `normalize_values()` - Remove accents from all text values
-- `standarize_values(columns=None)` - Lowercase + underscore replacement for values
+- `standardize_values(columns=None)` - Lowercase + underscore replacement for values
 
 ---
 

@@ -123,9 +123,9 @@ class Janitor:
     
         return self
     
-    def standarize_column_names(self):
+    def standardize_column_names(self):
         """Standardize column names by converting to lowercase and replacing spaces with underscores."""
-        self.pipeline.execute_operation('standarize_column_names')
+        self.pipeline.execute_operation('standardize_column_names')
 
         return self
     
@@ -141,8 +141,8 @@ class Janitor:
 
         return self
     
-    def standarize_values(self):
+    def standardize_values(self):
         """Standardize values in a specific column."""
-        self.pipeline.execute_operation('standarize_values')
+        self.pipeline.execute_operation('standardize_values')
 
         return self

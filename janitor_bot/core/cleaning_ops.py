@@ -31,7 +31,7 @@ def remove_empty_rows(df: pd.DataFrame) -> pd.DataFrame:
     return cleaned_df
 
 
-def standarize_column_names(df: pd.DataFrame) -> pd.DataFrame:
+def standardize_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """Standardize column names by converting to lowercase and replacing spaces with underscores."""
     
     if not isinstance(df, pd.DataFrame):
@@ -98,7 +98,7 @@ def normalize_values(df: pd.DataFrame) -> pd.DataFrame:
     
     return cleaned_df
 
-def standarize_values(df: pd.DataFrame, columns: list = None) -> pd.DataFrame:
+def standardize_values(df: pd.DataFrame, columns: list = None) -> pd.DataFrame:
     """
     Standardize text values in a DataFrame by converting to lowercase and replacing spaces with underscores.
 

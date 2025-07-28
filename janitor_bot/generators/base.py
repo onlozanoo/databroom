@@ -130,7 +130,7 @@ if __name__ == "__main__":
     # Example usage
     # Assuming Janitor class and its methods are defined in janitor_bot.core.janitor
     test_df = Janitor.from_csv('F:\Documentos\Econometria\Econometria en R\Talleres\Bases\pib_real.csv', sep=',')
-    test_df = test_df.remove_empty_cols(threshold=0.9).standarize_column_names().normalize_column_names().standarize_values()
+    test_df = test_df.remove_empty_cols(threshold=0.9).standardize_column_names().normalize_column_names().standardize_values()
     code = CodeGenerator('python')
     #print(test_df.get_history())
     print(code.templates)

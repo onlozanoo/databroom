@@ -11,10 +11,10 @@ if __name__ == "__main__" and __package__ is None:
 from janitor_bot.core.cleaning_ops import (
     remove_empty_cols, 
     remove_empty_rows,
-    standarize_column_names,
+    standardize_column_names,
     normalize_column_names,
     normalize_values,
-    standarize_values
+    standardize_values
 )
 
 class TestRemoveEmptyCols:
@@ -117,14 +117,14 @@ class TestRemoveEmptyRows:
         # Assert
         assert len(result) == 3  # All rows have at least one value
 
-class TestStandarizeColumnNames:
+class TestStandardizeColumnNames:
     def test_converts_to_lowercase(self):
         """Test that column names are converted to lowercase."""
         # Arrange
         df = pd.DataFrame({'UPPER_CASE': [1, 2], 'MixedCase': [3, 4]})
         
         # Act
-        result = standarize_column_names(df)
+        result = standardize_column_names(df)
         
         # Assert
         assert 'upper_case' in result.columns
@@ -136,7 +136,7 @@ class TestStandarizeColumnNames:
         df = pd.DataFrame({'Column Name': [1, 2], 'Another Column': [3, 4]})
         
         # Act
-        result = standarize_column_names(df)
+        result = standardize_column_names(df)
         
         # Assert
         assert 'column_name' in result.columns
@@ -148,7 +148,7 @@ class TestStandarizeColumnNames:
         df = pd.DataFrame({'Col-Name!': [1, 2], 'Col@Name#': [3, 4]})
         
         # Act
-        result = standarize_column_names(df)
+        result = standardize_column_names(df)
         
         # Assert
         column_names = list(result.columns)
@@ -190,7 +190,7 @@ class TestNormalizeValues:
         # Numbers should remain unchanged
         assert list(result['numbers']) == [1, 2, 3]
 
-class TestStandarizeValues:
+class TestStandardizeValues:
     def test_converts_to_lowercase(self):
         """Test that text values are converted to lowercase."""
         # Arrange
@@ -200,7 +200,7 @@ class TestStandarizeValues:
         })
         
         # Act
-        result = standarize_values(df)
+        result = standardize_values(df)
         
         # Assert
         assert 'upper_case' in result['text_col'].values
@@ -216,7 +216,7 @@ class TestStandarizeValues:
         })
         
         # Act
-        result = standarize_values(df)
+        result = standardize_values(df)
         
         # Assert
         assert 'text_with_spaces' in result['text_col'].values
@@ -231,7 +231,7 @@ class TestStandarizeValues:
         })
         
         # Act
-        result = standarize_values(df, columns=['target_col'])
+        result = standardize_values(df, columns=['target_col'])
         
         # Assert
         assert 'upper_case' in result['target_col'].values

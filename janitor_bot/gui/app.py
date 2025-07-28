@@ -185,7 +185,7 @@ def main():
                         f"Before operation - Columns: {list(st.session_state.janitor.get_df().columns)}",
                         "GUI",
                     )
-                    st.session_state.janitor.standarize_column_names()
+                    st.session_state.janitor.standardize_column_names()
                     debug_log(
                         f"After operation - Columns: {list(st.session_state.janitor.get_df().columns)}",
                         "GUI",
@@ -255,7 +255,7 @@ def main():
                         f"Before operation - Sample values: {st.session_state.janitor.get_df().iloc[0].to_dict() if len(st.session_state.janitor.get_df()) > 0 else 'No data'}",
                         "GUI",
                     )
-                    st.session_state.janitor.standarize_values()
+                    st.session_state.janitor.standardize_values()
                     debug_log(
                         f"After operation - Sample values: {st.session_state.janitor.get_df().iloc[0].to_dict() if len(st.session_state.janitor.get_df()) > 0 else 'No data'}",
                         "GUI",

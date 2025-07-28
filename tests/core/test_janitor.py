@@ -119,7 +119,7 @@ class TestJanitorOperations:
         janitor = Janitor(sample_dirty_data)
         
         # Act
-        result = janitor.standarize_column_names()
+        result = janitor.standardize_column_names()
         
         # Assert
         assert result is janitor
@@ -153,7 +153,7 @@ class TestJanitorChaining:
         # Act
         result = (janitor
                   .remove_empty_cols(threshold=0.9)
-                  .standarize_column_names()
+                  .standardize_column_names()
                   .normalize_column_names())
         
         # Assert
@@ -162,7 +162,7 @@ class TestJanitorChaining:
         # Verify each operation was recorded
         history = janitor.get_history()
         assert any('remove_empty_cols' in h for h in history)
-        assert any('standarize_column_names' in h for h in history)
+        assert any('standardize_column_names' in h for h in history)
         assert any('normalize_column_names' in h for h in history)
 
     def test_chaining_preserves_data_integrity(self, sample_clean_data):
@@ -173,7 +173,7 @@ class TestJanitorChaining:
         
         # Act
         result = (janitor
-                  .standarize_column_names()
+                  .standardize_column_names()
                   .normalize_column_names())
         
         # Assert
@@ -190,14 +190,14 @@ class TestJanitorHistory:
         
         # Act
         janitor.remove_empty_cols(threshold=0.5)
-        janitor.standarize_column_names()
+        janitor.standardize_column_names()
         
         # Assert
         history = janitor.get_history()
         assert len(history) == 2
         assert 'remove_empty_cols' in history[0]
         assert 'threshold=0.5' in history[0]
-        assert 'standarize_column_names' in history[1]
+        assert 'standardize_column_names' in history[1]
 
     @pytest.mark.skip(reason="History format en desarrollo - verificar formato exacto")
     def test_history_contains_parameters(self, sample_clean_data):
@@ -257,7 +257,7 @@ class TestJanitorEdgeCases:
         janitor = Janitor(empty_dataframe)
         
         # Act & Assert - should not raise exceptions
-        result = janitor.standarize_column_names()
+        result = janitor.standardize_column_names()
         assert result is janitor
 
 if __name__ == "__main__":
