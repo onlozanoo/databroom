@@ -86,7 +86,18 @@ python pruebas.py
 
 **GUI Instructions**: The web app will open at `http://localhost:8501`. Upload your CSV/Excel/JSON file, perform cleaning operations using the sidebar buttons, view results in real-time, and export Python code from the "Export Code" tab.
 
-### **🎯 What's Working Now**
+### **📦 PyPI Package Distribution (v0.4 - Coming Soon)**
+
+The next release will make janitor_bot available via PyPI for easy installation:
+
+```bash
+# Future release (v0.4)
+pip install janitor_bot
+janitor_gui  # Launch GUI directly
+janitor_bot clean data.csv --output cleaned.csv  # CLI usage
+```
+
+### **🎯 What's Working Now (v0.3)**
 
 ✅ **Complete GUI Workflow**: Upload → Clean → Preview → Export  
 ✅ **Code Generation**: Full Python scripts with imports, file loading, and operations  
@@ -94,6 +105,8 @@ python pruebas.py
 ✅ **Real-time Preview**: See changes immediately in the GUI  
 ✅ **History Tracking**: All operations logged and reproducible  
 ✅ **File Support**: CSV, Excel (.xlsx/.xls), and JSON files  
+✅ **Test Suite**: 83 unit tests with 69 passing, 52% code coverage - sufficient for v0.3  
+✅ **Package Ready**: PyPI-ready structure with proper imports  
 
 ### **Current Working Examples**
 
@@ -144,15 +157,16 @@ print(cleaned.get_df())
 
 ## 🛣️ Roadmap
 
-| Milestone                 | Version | Target Month | Highlights                                                                 |
-|--------------------------|---------|---------------|---------------------------------------------------------------------------|
-| **MVP**                  | `v0.1`  | —             | Core cleaning operations, Streamlit GUI, Python code export, basic tests |
-| **Bilingual Release**    | `v0.4`  | —             | R/tidyverse code generator, language toggle in UI, extended report capabilities |
-| **Recipes & Rules**      | `v0.5`  | —             | Save/load cleaning pipelines, column-specific rules, cleaning presets     |
-| **Extensibility Light**  | `v0.8`  | —             | User-defined cleaning functions, external Python snippet support          |
-| **Data Audits**          | `v1.0`  | —             | Great Expectations integration, basic validation reports                  |
-| **Export Mastery**       | `v1.5`  | —             | SQL & PySpark exporters, YAML pipeline export, no infrastructure required |
-| **(Optional) Cloud Mode**| `v2.0`  | —             | Multi-user hosting, authentication, job history, full SaaS deployment     |
+| Milestone                 | Version | Status | Highlights                                                                 |
+|--------------------------|---------|--------|---------------------------------------------------------------------------|
+| **MVP**                  | `v0.3`  | ✅ **COMPLETED** | Core cleaning operations, Streamlit GUI, Python code export, test suite for basic functionality |
+| **PyPI Release**         | `v0.4`  | 🚧 **IN PROGRESS** | CLI interface, PyPI package distribution, improved documentation |
+| **Bilingual Release**    | `v0.5`  | 📋 **PLANNED** | R/tidyverse code generator, language toggle in UI, extended report capabilities |
+| **Recipes & Rules**      | `v0.6`  | 📋 **PLANNED** | Save/load cleaning pipelines, column-specific rules, cleaning presets     |
+| **Extensibility Light**  | `v0.8`  | 📋 **PLANNED** | User-defined cleaning functions, external Python snippet support          |
+| **Data Audits**          | `v1.0`  | 📋 **PLANNED** | Great Expectations integration, basic validation reports                  |
+| **Export Mastery**       | `v1.5`  | 📋 **PLANNED** | SQL & PySpark exporters, YAML pipeline export, no infrastructure required |
+| **(Optional) Cloud Mode**| `v2.0`  | 📋 **PLANNED** | Multi-user hosting, authentication, job history, full SaaS deployment     |
 
 ---
 
@@ -176,14 +190,19 @@ print(cleaned.get_df())
 
 ### **PHASE 4: Integration and Export**
 11. **Code Export** - ✅ **COMPLETED** - GUI tab with automatic preview and download of Python scripts
-12. **Basic Testing** - 📋 **PENDING** - Tests for core functions
+12. **Basic Testing** - ✅ **COMPLETED** - Test suite with 69 passing tests, sufficient for v0.3
 13. **Basic CLI** - 📋 **PENDING** - Simple command for headless usage
 
-### **PHASE 5: Expansion**
-14. **More Operations** - Add remaining cleaning functions
-15. **R Generator** - Implement R templates
-16. **Reports** - Basic HTML reports
-17. **Configuration** - pyproject.toml, requirements, etc.
+### **PHASE 5: PyPI Distribution (v0.4 - Next Release)**
+14. **CLI Interface** - 📋 **PENDING** - Typer-based command line interface
+15. **Package Build** - 📋 **PENDING** - Build scripts and PyPI upload
+16. **MANIFEST.in** - 📋 **PENDING** - Include template files in package
+17. **Distribution Testing** - 📋 **PENDING** - Test installation from PyPI
+
+### **PHASE 6: Future Expansion** 
+18. **More Operations** - Add remaining cleaning functions from roadmap
+19. **R Generator** - Implement R templates  
+20. **Reports** - Basic HTML reports
 
 ### **🎯 Recommended Order**
 Start with **PHASE 1** - A solid core foundation allows everything else to work correctly. Each phase can be tested independently before moving to the next.
