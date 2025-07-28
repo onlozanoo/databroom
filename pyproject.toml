@@ -9,10 +9,10 @@ description = "A cross-language DataFrame cleaning assistant with interactive GU
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Oscar Lozano", email = "onlozanoo@gmail.com"}
+    {name = "Oliver Lozano", email = "onlozanoo@gmail.com"}
 ]
 maintainers = [
-    {name = "Oscar Lozano", email = "onlozanoo@gmail.com"}
+    {name = "Oliver Lozano", email = "onlozanoo@gmail.com"}
 ]
 keywords = [
     "data-cleaning", 
