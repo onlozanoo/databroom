@@ -1,6 +1,8 @@
-{% import "macros.j2" as macros %}
 
-{{ macros.header(date) }}
+# =========================================
+# Janitor Bot - Automated Data Cleaning and Preparation
+# Date: 2025-07-28 11:38:30
+# =========================================
 
 # Required packages: tidyverse, janitor, stringi
 # Install with: install.packages(c("tidyverse", "janitor", "stringi"))
@@ -10,17 +12,15 @@ library(janitor)
 library(stringi)
 
 # Load your dataset
-df_original <- read_csv("{{ filename or 'your_data_file.csv' }}", show_col_types = FALSE)
+df_original <- read_csv("your_data_file.csv", show_col_types = FALSE)
 cat("Original shape:", nrow(df_original), "rows x", ncol(df_original), "columns\n")
 
 # Apply cleaning operations using tidyverse pipe syntax
-{% if steps and steps.strip() %}
 df_cleaned <- df_original %>%
-  {{ steps }}
-{% else %}
-# No cleaning operations applied
-df_cleaned <- df_original
-{% endif %}
+  select_if(~ mean(is.na(.)) < 0.09999999999999998) %>%
+  clean_names(case = 'snake') %>%
+  rename_with(~ stri_trans_general(., 'Latin-ASCII')) %>%
+  mutate(across(where(is.character), ~ str_to_lower(str_replace_all(., ' ', '_'))))
 
 # Display results
 cat("\nData cleaning completed!\n")
@@ -39,4 +39,6 @@ glimpse(df_cleaned)
 # Optionally save the cleaned data
 # write_csv(df_cleaned, "cleaned_data.csv")
 
-{{ macros.footer() }}
+# =========================================
+# End of Janitor Bot script
+# =========================================

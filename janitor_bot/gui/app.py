@@ -52,6 +52,9 @@ def main():
     if 'uploaded_file_name' not in st.session_state:
         st.session_state.uploaded_file_name = None
         debug_log("Initialized uploaded_file_name in session state", "GUI")
+    if 'last_interaction' not in st.session_state:
+        st.session_state.last_interaction = None
+        debug_log("Initialized last_interaction in session state", "GUI")
     
     debug_log(f"Current session state - janitor: {st.session_state.janitor is not None}, history_length: {len(st.session_state.cleaning_history)}", "GUI")
     
@@ -101,14 +104,78 @@ def main():
         if st.session_state.janitor is not None:
             st.header("🧹 Cleaning Operations")
             
-            # Reset button
-            if st.button("🔄 Reset to Original", help="Reset DataFrame to original state", use_container_width=True):
-                debug_log("Reset button clicked", "GUI")
-                debug_log(f"Before reset - History length: {len(st.session_state.cleaning_history)}", "GUI")
-                st.session_state.janitor.reset()
-                st.session_state.cleaning_history = []
-                debug_log("Reset completed - DataFrame and history cleared", "GUI")
-                st.rerun()
+            # Control buttons
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Step back button
+                can_step_back = st.session_state.janitor.can_step_back()
+                confirm_step_back = st.session_state.get('confirm_step_back', False)
+                
+                # Reset confirmation if user interacted with something else
+                if st.session_state.last_interaction not in [None, 'step_back'] and confirm_step_back:
+                    st.session_state.confirm_step_back = False
+                    confirm_step_back = False
+                
+                button_text = "⚠️ Press again to confirm" if confirm_step_back else "↶ Step Back"
+                button_help = "Press again to confirm step back" if confirm_step_back else "Undo last operation"
+                
+                if st.button(button_text, help=button_help, use_container_width=True, disabled=not can_step_back):
+                    debug_log("Step back button clicked", "GUI")
+                    st.session_state.last_interaction = 'step_back'
+                    
+                    if confirm_step_back:
+                        # Execute step back
+                        debug_log(f"Before step back - History length: {len(st.session_state.cleaning_history)}", "GUI")
+                        try:
+                            st.session_state.janitor.step_back()
+                            # Sync session state with pipeline
+                            st.session_state.cleaning_history = st.session_state.janitor.get_history().copy()
+                            debug_log(f"Step back completed - New history length: {len(st.session_state.cleaning_history)}", "GUI")
+                            st.success("↶ Stepped back to previous state")
+                            st.session_state.confirm_step_back = False
+                            st.session_state.last_interaction = None
+                            st.rerun()
+                        except ValueError as e:
+                            debug_log(f"Step back failed: {e}", "GUI")
+                            st.error(f"Cannot step back: {e}")
+                            st.session_state.confirm_step_back = False
+                            st.session_state.last_interaction = None
+                    else:
+                        # Set confirmation flag
+                        st.session_state.confirm_step_back = True
+                        st.rerun()
+            
+            with col2:
+                # Reset button
+                confirm_reset = st.session_state.get('confirm_reset', False)
+                
+                # Reset confirmation if user interacted with something else
+                if st.session_state.last_interaction not in [None, 'reset'] and confirm_reset:
+                    st.session_state.confirm_reset = False
+                    confirm_reset = False
+                
+                button_text = "⚠️ Press again to confirm" if confirm_reset else "🔄 Reset to Original"
+                button_help = "Press again to confirm reset" if confirm_reset else "Reset DataFrame to original state"
+                
+                if st.button(button_text, help=button_help, use_container_width=True):
+                    debug_log("Reset button clicked", "GUI")
+                    st.session_state.last_interaction = 'reset'
+                    
+                    if confirm_reset:
+                        # Execute reset
+                        debug_log(f"Before reset - History length: {len(st.session_state.cleaning_history)}", "GUI")
+                        st.session_state.janitor.reset()
+                        st.session_state.cleaning_history = []
+                        debug_log("Reset completed - DataFrame and history cleared", "GUI")
+                        st.success("🔄 Reset to original state")
+                        st.session_state.confirm_reset = False
+                        st.session_state.last_interaction = None
+                        st.rerun()
+                    else:
+                        # Set confirmation flag
+                        st.session_state.confirm_reset = True
+                        st.rerun()
             
             st.markdown("---")
 
@@ -131,6 +198,7 @@ def main():
                     use_container_width=True,
                 ):
                     debug_log(f"Remove Empty Cols clicked - Threshold: {threshold}", "GUI")
+                    st.session_state.last_interaction = 'remove_empty_cols'
                     debug_log(
                         f"Before operation - Shape: {st.session_state.janitor.get_df().shape}",
                         "GUI",
@@ -157,6 +225,7 @@ def main():
                     use_container_width=True,
                 ):
                     debug_log("Remove Empty Rows clicked", "GUI")
+                    st.session_state.last_interaction = 'remove_empty_rows'
                     debug_log(
                         f"Before operation - Shape: {st.session_state.janitor.get_df().shape}",
                         "GUI",
@@ -181,6 +250,7 @@ def main():
                     use_container_width=True,
                 ):
                     debug_log("Standardize Names clicked", "GUI")
+                    st.session_state.last_interaction = 'standardize_names'
                     debug_log(
                         f"Before operation - Columns: {list(st.session_state.janitor.get_df().columns)}",
                         "GUI",
@@ -204,6 +274,7 @@ def main():
                     use_container_width=True,
                 ):
                     debug_log("Normalize Names clicked", "GUI")
+                    st.session_state.last_interaction = 'normalize_names'
                     debug_log(
                         f"Before operation - Columns: {list(st.session_state.janitor.get_df().columns)}",
                         "GUI",
@@ -228,6 +299,7 @@ def main():
                     use_container_width=True,
                 ):
                     debug_log("Normalize Values clicked", "GUI")
+                    st.session_state.last_interaction = 'normalize_values'
                     debug_log(
                         f"Before operation - Sample values: {st.session_state.janitor.get_df().iloc[0].to_dict() if len(st.session_state.janitor.get_df()) > 0 else 'No data'}",
                         "GUI",
@@ -251,6 +323,7 @@ def main():
                     use_container_width=True,
                 ):
                     debug_log("Standardize Values clicked", "GUI")
+                    st.session_state.last_interaction = 'standardize_values'
                     debug_log(
                         f"Before operation - Sample values: {st.session_state.janitor.get_df().iloc[0].to_dict() if len(st.session_state.janitor.get_df()) > 0 else 'No data'}",
                         "GUI",
@@ -272,6 +345,10 @@ def main():
     if st.session_state.janitor is not None:
         # Tabs for different views
         tab1, tab2, tab3, tab4 = st.tabs(["📊 Current Data", "📝 History", "🔍 Data Info", "💾 Export Code"])
+        
+        # Track tab interactions
+        if st.session_state.get('current_tab') != tab1:
+            st.session_state.last_interaction = 'tab_change'
         
         with tab1:
             st.subheader("Current DataFrame")
@@ -338,63 +415,84 @@ def main():
             st.subheader("Export Cleaned Code")
             
             if len(st.session_state.cleaning_history) > 0:
-                col1, col2 = st.columns(2)
+                # Language selection dropdown
+                selected_language = st.selectbox(
+                    "Select programming language:",
+                    options=["Python/Pandas", "R/Tidyverse"],
+                    index=0,
+                    help="Choose the programming language for code generation",
+                    on_change=lambda: setattr(st.session_state, 'last_interaction', 'language_select')
+                )
                 
-                with col1:
-                    st.markdown("### 🐍 Python/Pandas")
-                    
-                    # Always show preview if operations exist
-                    try:
+                st.markdown("---")
+                
+                # Generate code based on selection
+                try:
+                    if selected_language == "Python/Pandas":
                         debug_log("Generating Python code preview", "GUI")
                         generator = CodeGenerator('python')
-                        history = st.session_state.janitor.get_history()
-                        generator.load_history(history)
-                        code = generator.generate_code()
-                        
-                        # Generate complete code with imports and file loading
-                        from datetime import datetime
-                        from jinja2 import Environment, FileSystemLoader
-                        from pathlib import Path
-                        
-                        templates_dir = Path(__file__).parent.parent / "generators" / "templates"
-                        env = Environment(loader=FileSystemLoader(str(templates_dir)))
-                        template = env.get_template("python_pipeline.py.j2")
-                        
-                        # Use actual filename if available
-                        filename = st.session_state.uploaded_file_name or "your_data_file.csv"
-                        
-                        context = {
-                            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                            "steps": code,
-                            "filename": filename
-                        }
-                        
-                        full_script = template.render(context)
-                        
-                        # Show preview
-                        st.code(full_script, language='python')
-                        
-                        # Download button
-                        st.download_button(
-                            label="📥 Download Python Script",
-                            data=full_script,
-                            file_name="janitor_cleaning_pipeline.py",
-                            mime="text/plain"
-                        )
-                        
-                    except Exception as e:
-                        debug_log(f"Error generating Python code: {e}", "GUI")
-                        st.error(f"Error generating code: {e}")
+                        template_name = "python_pipeline.py.j2"
+                        file_extension = ".py"
+                        code_language = 'python'
+                        download_label = "📥 Download Python Script"
+                    else:  # R/Tidyverse
+                        debug_log("Generating R code preview", "GUI")
+                        generator = CodeGenerator('R')
+                        template_name = "R_pipeline.R.j2"
+                        file_extension = ".R"
+                        code_language = 'r'
+                        download_label = "📥 Download R Script"
                     
-                    if st.button("🔄 Refresh Code", help="Regenerate the code preview"):
-                        st.rerun()
+                    # Generate code
+                    history = st.session_state.janitor.get_history()
+                    generator.load_history(history)
+                    code = generator.generate_code()
+                    
+                    # Generate complete code with imports and file loading
+                    from datetime import datetime
+                    from jinja2 import Environment, FileSystemLoader
+                    from pathlib import Path
+                    
+                    templates_dir = Path(__file__).parent.parent / "generators" / "templates"
+                    env = Environment(loader=FileSystemLoader(str(templates_dir)))
+                    template = env.get_template(template_name)
+                    
+                    # Use actual filename if available
+                    filename = st.session_state.uploaded_file_name or "your_data_file.csv"
+                    
+                    # For R, suggest CSV format for Excel files
+                    if selected_language == "R/Tidyverse" and filename.endswith(('.xlsx', '.xls')):
+                        filename_for_r = filename.replace('.xlsx', '.csv').replace('.xls', '.csv')
+                        st.info("💡 Note: R script uses CSV format. Convert Excel file to CSV for best compatibility.")
+                        filename = filename_for_r
+                    
+                    context = {
+                        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "steps": code,
+                        "filename": filename
+                    }
+                    
+                    full_script = template.render(context)
+                    
+                    # Show preview
+                    st.code(full_script, language=code_language)
+                    
+                    # Download button
+                    st.download_button(
+                        label=download_label,
+                        data=full_script,
+                        file_name=f"janitor_cleaning_pipeline{file_extension}",
+                        mime="text/plain"
+                    )
+                    
+                except Exception as e:
+                    debug_log(f"Error generating {selected_language} code: {e}", "GUI")
+                    st.error(f"Error generating {selected_language} code: {e}")
                 
-                with col2:
-                    st.markdown("### 📊 R/Tidyverse")
-                    if st.button("Generate R Code", help="R/Tidyverse code generation - Coming Soon!", disabled=True):
-                        st.info("🚧 R code generation coming in future updates!")
-                    
-                    st.info("🔜 R/Tidyverse support coming soon!")
+                # Refresh button
+                if st.button("🔄 Refresh Code", help="Regenerate the code preview"):
+                    st.session_state.last_interaction = 'refresh_code'
+                    st.rerun()
             else:
                 st.info("Perform some cleaning operations first to generate exportable code.")
     

@@ -15,8 +15,10 @@ class CleaningPipeline:
         self.df_original = df.copy() # Store the original DataFrame
         self.operations = available_functions
         self.history_list = []
+        self.df_snapshots = [df.copy()]  # Store DataFrame snapshots for step back
         debug_log(f"Pipeline initialized with {len(self.operations)} operations: {self.operations}", "PIPELINE")
         debug_log(f"Original DataFrame stored - Shape: {self.df_original.shape}", "PIPELINE")
+        debug_log(f"Initial snapshot stored - Total snapshots: {len(self.df_snapshots)}", "PIPELINE")
     
     def get_current_dataframe(self):
         """Return the current state of the DataFrame."""
@@ -29,6 +31,38 @@ class CleaningPipeline:
     def get_operation_count(self):
         """Return the number of operations performed."""
         return len(self.history_list)
+    
+    def can_step_back(self):
+        """Check if step back is possible."""
+        return len(self.df_snapshots) > 1
+    
+    def step_back(self):
+        """
+        Step back to the previous DataFrame state.
+        
+        Returns:
+            pd.DataFrame: The DataFrame state after stepping back
+            
+        Raises:
+            ValueError: If no previous state is available to step back to
+        """
+        debug_log(f"Step back requested - Current snapshots: {len(self.df_snapshots)}, history: {len(self.history_list)}", "PIPELINE")
+        
+        if not self.can_step_back():
+            debug_log("Step back failed - No previous state available", "PIPELINE")
+            raise ValueError("No previous state available to step back to")
+        
+        # Remove current snapshot and history entry
+        self.df_snapshots.pop()
+        if self.history_list:
+            removed_operation = self.history_list.pop()
+            debug_log(f"Removed operation from history: {removed_operation}", "PIPELINE")
+        
+        # Restore previous DataFrame state
+        self.df = self.df_snapshots[-1].copy()
+        debug_log(f"Stepped back - New shape: {self.df.shape}, snapshots: {len(self.df_snapshots)}, history: {len(self.history_list)}", "PIPELINE")
+        
+        return self.df
         
     def execute_operation(self, operation, *args, **kwargs):
         """
@@ -63,5 +97,9 @@ class CleaningPipeline:
             self.df = decorated_func(self.df, *args, **kwargs)
             debug_log(f"After operation - DataFrame shape: {self.df.shape}", "PIPELINE")
             debug_log(f"History list now has {len(self.history_list)} entries", "PIPELINE")
+            
+            # Store snapshot after successful operation for step back functionality
+            self.df_snapshots.append(self.df.copy())
+            debug_log(f"Snapshot stored - Total snapshots: {len(self.df_snapshots)}", "PIPELINE")
         
         return self.df

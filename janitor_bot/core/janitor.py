@@ -105,8 +105,25 @@ class Janitor:
     def reset(self):
         """Reset the DataFrame to its initial state."""
         self.pipeline.df = self.pipeline.df_original.copy()
-        self.pipeline.history = []
-        self.pipeline.current_operation = None
+        self.pipeline.history_list = []
+        self.pipeline.df_snapshots = [self.pipeline.df_original.copy()]
+        return self
+    
+    def can_step_back(self):
+        """Check if step back is possible."""
+        return self.pipeline.can_step_back()
+    
+    def step_back(self):
+        """
+        Step back to the previous DataFrame state.
+        
+        Returns:
+            Janitor: Self for method chaining
+            
+        Raises:
+            ValueError: If no previous state is available to step back to
+        """
+        self.pipeline.step_back()
         return self
     
     def remove_empty_cols(self, threshold: float = 0.9):

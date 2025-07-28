@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 from datetime import datetime
 
 # Development path setup (only when run directly)
-if __name__ == "__main__" and __package__ is None:
+if __name__ == "__main__":# and __package__ is None:
     # Dynamically find the project root
     def find_project_root():
         """Find the project root by searching for pyproject.toml upwards."""
@@ -91,9 +91,60 @@ class CodeGenerator:
                     code = f"janitor_instance = janitor_instance.{func}({params_formatted})"
                 else:
                     code += f".{func}({params_formatted})"
+        
+        elif self.language == 'R':
+            code_lines = []
+            for func, params_str in self.history:
+                # Convert the string to a real dict (safe with ast.literal_eval)
+                params_dict = ast.literal_eval(params_str)
+                
+                # Convert Python cleaning operations to R/tidyverse equivalents
+                r_line = self._python_to_r_operation(func, params_dict)
+                if r_line:
+                    code_lines.append(r_line)
+            
+            # Join with pipe operator for tidyverse style
+            if code_lines:
+                code = " %>%\n  ".join(code_lines)
                         
-                    
         return code
+    
+    def _python_to_r_operation(self, func_name, params):
+        """
+        Convert Python cleaning operations to R/tidyverse equivalents.
+        
+        Args:
+            func_name (str): Python function name
+            params (dict): Function parameters
+            
+        Returns:
+            str: R/tidyverse equivalent code
+        """
+        
+        if func_name == 'remove_empty_cols':
+            threshold = params.get('threshold', 0.9)
+            # In R: remove columns where more than (1-threshold) of values are NA
+            na_threshold = 1 - threshold
+            return f"select_if(~ mean(is.na(.)) < {na_threshold})"
+        
+        elif func_name == 'remove_empty_rows':
+            return "filter(!if_all(everything(), is.na))"
+        
+        elif func_name == 'standardize_column_names':
+            return "clean_names(case = 'snake')"
+        
+        elif func_name == 'normalize_column_names':
+            return "rename_with(~ stri_trans_general(., 'Latin-ASCII'))"
+        
+        elif func_name == 'normalize_values':
+            return "mutate(across(where(is.character), ~ stri_trans_general(., 'Latin-ASCII')))"
+        
+        elif func_name == 'standardize_values':
+            return "mutate(across(where(is.character), ~ str_to_lower(str_replace_all(., ' ', '_'))))"
+        
+        else:
+            # For unknown operations, add a comment
+            return f"# TODO: Implement R equivalent for {func_name}({params})"
     
     def export_code(self, filename):
         """
@@ -129,13 +180,13 @@ if __name__ == "__main__":
     
     # Example usage
     # Assuming Janitor class and its methods are defined in janitor_bot.core.janitor
-    test_df = Janitor.from_csv('F:\Documentos\Econometria\Econometria en R\Talleres\Bases\pib_real.csv', sep=',')
+    test_df = Janitor.from_excel(r'Z:\Direccion Comercial\Informes\18-07-2025.xlsx')
     test_df = test_df.remove_empty_cols(threshold=0.9).standardize_column_names().normalize_column_names().standardize_values()
-    code = CodeGenerator('python')
+    code = CodeGenerator('R')
     #print(test_df.get_history())
     print(code.templates)
     history = code.load_history(test_df.get_history())
     #print(history)
 
     print(code.generate_code())
-    code.export_code(r'F:\Documentos\Proyectos DS\Janitor\janitor_bot\tests\generators\test_generated_pipeline.py')
+    code.export_code(r'C:\Users\Olive\Documents\Proyectos DS\Janitor\janitor_bot\test_generated_pipeline.R')
