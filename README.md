@@ -69,7 +69,7 @@ janitor_bot/
 
 ```bash
 # 1. Clone
-git clone https://github.com/<onlozanoo/janitor_bot.git && cd janitor_bot
+git clone https://github.com/onlozanoo/janitor_bot.git && cd janitor_bot
 
 # 2. Create and activate a virtual environment
 python -m venv venv && source venv/bin/activate

@@ -6,20 +6,22 @@ import ast
 from jinja2 import Environment, FileSystemLoader
 from datetime import datetime
 
-# Dynamically find the project root
-def find_project_root():
-    """Find the project root by searching for pyproject.toml upwards."""
-    current_path = Path(__file__).resolve()
-    for parent in current_path.parents:
-        if (parent / 'pyproject.toml').exists():
-            return parent
-    # If pyproject.toml is not found, use the current directory
-    return current_path.parent.parent.parent
-
-# Add the project root to the path
-project_root = find_project_root()
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+# Development path setup (only when run directly)
+if __name__ == "__main__" and __package__ is None:
+    # Dynamically find the project root
+    def find_project_root():
+        """Find the project root by searching for pyproject.toml upwards."""
+        current_path = Path(__file__).resolve()
+        for parent in current_path.parents:
+            if (parent / 'pyproject.toml').exists():
+                return parent
+        # If pyproject.toml is not found, use the current directory
+        return current_path.parent.parent.parent
+    
+    # Add the project root to the path
+    project_root = find_project_root()
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
 
 from janitor_bot.core.janitor import Janitor 
 

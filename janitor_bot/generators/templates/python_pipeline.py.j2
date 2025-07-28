@@ -2,22 +2,13 @@
 
 {{ macros.header(date) }}
 
+# Required installation: pip install janitor_bot
 import pandas as pd
-import sys
-from pathlib import Path
-
-# Add project root to path for imports
-project_root = Path(__file__).resolve().parent
-while not (project_root / 'pyproject.toml').exists() and project_root != project_root.parent:
-    project_root = project_root.parent
-
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
 from janitor_bot.core.janitor import Janitor
 
 # Load your dataset using Janitor
 janitor_instance = Janitor.from_csv("{{ filename or 'your_data_file.csv' }}")
+print(f"Original shape: {janitor_instance.get_df().shape}")
 
 # Apply cleaning operations
 {{steps}}
@@ -27,7 +18,10 @@ df_cleaned = janitor_instance.pipeline.df
 
 # Display results
 print("Data cleaning completed!")
+print(f"Original shape: {janitor_instance.pipeline.df_original.shape}")
 print(f"Final shape: {df_cleaned.shape}")
+print(f"Columns removed: {janitor_instance.pipeline.df_original.shape[1] - df_cleaned.shape[1]}")
+print(f"Rows removed: {janitor_instance.pipeline.df_original.shape[0] - df_cleaned.shape[0]}")
 print("\nFirst 5 rows of cleaned data:")
 print(df_cleaned.head())
 

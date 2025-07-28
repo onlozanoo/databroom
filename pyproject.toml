@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "janitor-bot"
+name = "janitor_bot"
 version = "0.3.0"
 description = "A cross-language DataFrame cleaning assistant with interactive GUI and one-click code export"
 readme = "README.md"
@@ -68,21 +68,21 @@ reports = [
     "kaleido>=0.2.1"
 ]
 all = [
-    "janitor-bot[dev,cli,reports]"
+    "janitor_bot[dev,cli,reports]"
 ]
 
 [project.urls]
-Homepage = "https://github.com/onlozanoo/janitor-bot"
-Documentation = "https://github.com/onlozanoo/janitor-bot/blob/main/README.md"
-Repository = "https://github.com/onlozanoo/janitor-bot"
-Issues = "https://github.com/onlozanoo/janitor-bot/issues"
-Changelog = "https://github.com/onlozanoo/janitor-bot/releases"
+Homepage = "https://github.com/onlozanoo/janitor_bot"
+Documentation = "https://github.com/onlozanoo/janitor_bot/blob/main/README.md"
+Repository = "https://github.com/onlozanoo/janitor_bot"
+Issues = "https://github.com/onlozanoo/janitor_bot/issues"
+Changelog = "https://github.com/onlozanoo/janitor_bot/releases"
 
 [project.scripts]
-janitor-bot = "janitor_bot.cli.main:app"
+janitor_bot = "janitor_bot.cli.main:app"
 
 [project.gui-scripts]
-janitor-gui = "janitor_bot.gui.app:main"
+janitor_gui = "janitor_bot.gui.app:main"
 
 [tool.setuptools]
 packages = ["janitor_bot"]

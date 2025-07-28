@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
-import sys
-import os
 
-# Add the project root to the path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+# Development path setup (only when run directly)
+if __name__ == "__main__" and __package__ is None:
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from janitor_bot.core.janitor import Janitor
 from janitor_bot.core.debug_logger import debug_log, get_current_log_file
