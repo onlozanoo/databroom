@@ -16,10 +16,11 @@ Handling missing values, inconsistent column names, and mismatched data types is
 | -------------- | ----------------------------------------------------------------------------------------------------------- | ------ |
 | **GUI**        | Streamlit interface with file upload, live preview, and interactive cleaning operations                     | ✅ **COMPLETED** |
 | **Core API**   | Chainable `Janitor()` class (`.remove_empty_cols() → .standardize_column_names() → …`)                      | ✅ **COMPLETED** |
-| **Export**     | Generate & download Python scripts that reproduce all cleaning operations                                   | ✅ **COMPLETED** |
+| **Export**     | Generate & download Python/R scripts that reproduce all cleaning operations                                 | ✅ **COMPLETED** |
+| **R Export**   | R/tidyverse code generation with full pipeline support                                                     | ✅ **COMPLETED** |
+| **Step Back**  | Undo functionality to revert cleaning operations with DataFrame snapshots                                   | ✅ **COMPLETED** |
 | **Reporting**  | One‑page HTML summary (missing values, type casts, outliers flagged)                                        | 📋 **PLANNED** |
 | **CLI**        | `janitor-bot clean data.csv --lang py` for headless pipelines                                               | 📋 **PLANNED** |
-| **R Export**   | R/tidyverse code generation                                                                                 | 📋 **PLANNED** |
 
 ---
 
@@ -52,10 +53,10 @@ janitor_bot/
 │   ├── janitor.py       # ✅ Main user-friendly API with factory methods
 │   └── report.py        # 📋 HTML/Rich reports (planned)
 ├── generators/          # Code template engines
-│   ├── base.py          # ✅ Code generator with Jinja2 templates
+│   ├── base.py          # ✅ Code generator with Jinja2 templates + R operations mapping
 │   └── templates/       # ✅ Jinja2 templates for Python/R
 │       ├── python_pipeline.py.j2  # ✅ Complete Python script template
-│       ├── R_pipeline.R.j2         # 📋 R script template (placeholder)
+│       ├── R_pipeline.R.j2         # ✅ Complete R/tidyverse script template
 │       └── macros.j2              # ✅ Reusable template components
 ├── gui/                 # Streamlit app
 │   └── app.py           # ✅ Complete GUI with export functionality
@@ -97,16 +98,18 @@ janitor_gui  # Launch GUI directly
 janitor_bot clean data.csv --output cleaned.csv  # CLI usage
 ```
 
-### **🎯 What's Working Now (v0.3)**
+### **🎯 What's Working Now (v0.3+)**
 
 ✅ **Complete GUI Workflow**: Upload → Clean → Preview → Export  
-✅ **Code Generation**: Full Python scripts with imports, file loading, and operations  
+✅ **Dual Code Generation**: Full Python/pandas + R/tidyverse scripts with imports and file loading  
 ✅ **Interactive Operations**: Remove empty columns/rows, standardize/normalize names/values  
-✅ **Real-time Preview**: See changes immediately in the GUI  
-✅ **History Tracking**: All operations logged and reproducible  
+✅ **Step Back Functionality**: Undo operations with DataFrame snapshots and visual warnings  
+✅ **Real-time Preview**: See changes immediately in the GUI with enhanced UI styling  
+✅ **History Tracking**: All operations logged and reproducible across languages  
 ✅ **File Support**: CSV, Excel (.xlsx/.xls), and JSON files  
 ✅ **Test Suite**: 83 unit tests with 69 passing, 52% code coverage - sufficient for v0.3  
 ✅ **Package Ready**: PyPI-ready structure with proper imports  
+✅ **Warning System**: Color-coded buttons with captions for destructive operations  
 
 ### **Current Working Examples**
 
