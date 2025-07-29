@@ -12,7 +12,7 @@ class OperationApplier:
     """Maneja la aplicación dinámica de operaciones de limpieza"""
     
     def __init__(self, broom: Broom, verbose: bool = False):
-        self.broom = Broom
+        self.broom = broom
         self.verbose = verbose
         self.operations_applied = []
         self.df_before = broom.get_df().copy()
@@ -68,7 +68,7 @@ class OperationApplier:
         """Aplica una sola operación con manejo de errores"""
         try:
             op_config = CLEANING_OPERATIONS[op_name]
-            method = getattr(self.janitor, op_config['method'])
+            method = getattr(self.broom, op_config['method'])
             
             # Construir argumentos para la llamada
             method_kwargs = self._build_method_kwargs(op_name, operation_params)
@@ -134,7 +134,7 @@ class OperationApplier:
     
     def get_summary(self) -> Dict[str, Any]:
         """Genera resumen de cambios aplicados"""
-        df_after = self.janitor.get_df()
+        df_after = self.broom.get_df()
         
         return {
             'operations_applied': self.operations_applied,

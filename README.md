@@ -2,9 +2,134 @@
 
 *A powerful DataFrame cleaning tool with **Command Line Interface**, **Interactive GUI**, and **Programmatic API** - automatically generates reproducible **Python/pandas** and **R/tidyverse** code.*
 
-[![PyPI version](https://badge.fury.io/py/janitor-bot.svg)](https://pypi.org/project/janitor-bot/)
+[![PyPI version](https://badge.fury.io/py/databroom.svg)](https://pypi.org/project/databroom/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+---
+
+## 🆚 Why Databroom? 
+
+### **The Problem: Manual Data Cleaning is Tedious**
+
+**With pandas (manual approach):**
+```python
+import pandas as pd
+import unicodedata
+
+# Read the file
+df = pd.read_csv("messy_data.csv")
+
+# Remove columns with more than 90% missing values
+threshold = 0.9
+df = df.loc[:, df.isnull().mean() < threshold]
+
+# Standardize column names manually
+df.columns = df.columns.str.lower().str.replace(' ', '_')
+
+# Normalize text values (removing accents)
+def normalize_text(text):
+    if not isinstance(text, str):
+        return text
+    return ''.join(
+        c for c in unicodedata.normalize('NFKD', text)
+        if not unicodedata.combining(c)
+    )
+
+# Apply to all string columns (need to identify them first)
+string_cols = df.select_dtypes(include=['object']).columns
+for col in string_cols:
+    df[col] = df[col].apply(normalize_text)
+
+# Save the result
+df.to_csv("clean_data.csv", index=False)
+```
+
+**With Databroom (one command):**
+```bash
+databroom clean messy_data.csv \
+  --remove-empty-cols \
+  --standardize-column-names \
+  --normalize-values \
+  --output-file clean_data.csv \
+  --output-code cleaning_script.py
+```
+
+### **The Benefits**
+
+| Feature | Manual Pandas | Databroom |
+|---------|---------------|-----------|
+| **Lines of code** | ~20+ lines | 1 command |
+| **Time to implement** | 10-15 minutes | 10 seconds |
+| **Error prone** | High (manual logic) | Low (tested operations) |
+| **Reproducible** | Need to save script | Auto-generates code |
+| **Cross-language** | Python only | Python + R output |
+| **GUI option** | No | Yes (`databroom gui`) |
+| **Parameter tuning** | Manual coding | CLI flags & GUI sliders |
+
+### **Real-world Comparison**
+
+**Complex cleaning task:**
+```python
+# Pandas approach: ~50 lines of code
+import pandas as pd
+import unicodedata
+import numpy as np
+
+df = pd.read_excel("survey_data.xlsx")
+
+# Remove empty columns
+empty_threshold = 0.8
+df = df.dropna(axis=1, thresh=int(empty_threshold * len(df)))
+
+# Remove empty rows  
+df = df.dropna(how='all')
+
+# Fix column names
+df.columns = df.columns.str.lower()
+df.columns = df.columns.str.replace(' ', '_')
+df.columns = df.columns.str.replace('[^a-z0-9_]', '', regex=True)
+
+# Normalize text in all string columns
+def clean_text(text):
+    if pd.isna(text) or not isinstance(text, str):
+        return text
+    # Remove accents
+    text = unicodedata.normalize('NFKD', text)
+    text = ''.join(c for c in text if not unicodedata.combining(c))
+    return text
+
+string_columns = df.select_dtypes(include=['object']).columns
+for col in string_columns:
+    df[col] = df[col].apply(clean_text)
+
+df.to_csv("cleaned_survey.csv", index=False)
+```
+
+**Databroom approach:**
+```bash
+databroom clean survey_data.xlsx \
+  --remove-empty-cols --remove-empty-cols-threshold 0.8 \
+  --remove-empty-rows \
+  --standardize-column-names \
+  --normalize-values \
+  --output-file cleaned_survey.csv \
+  --output-code survey_cleaning.py \
+  --verbose
+```
+
+**Result:** Same output, 1 command, includes reproducible script generation.
+
+### **When to Use Databroom**
+
+✅ **Perfect for:**
+- **🤖 Full automation** - Transform your entire data cleaning pipeline into a single command
+- Quick data exploration and cleaning
+- Batch processing multiple files
+- Learning data cleaning best practices
+- Generating reproducible cleaning scripts
+- Teams needing consistent data preprocessing
+- Converting workflows between Python and R
 
 ---
 

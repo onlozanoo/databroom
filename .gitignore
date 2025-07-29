@@ -13,3 +13,4 @@ __pycache__
 logs
 CLAUDE.md.save
 test_generated_pipeline.py
+test_clean.csv
