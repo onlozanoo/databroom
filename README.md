@@ -138,8 +138,14 @@ databroom clean survey_data.xlsx \
 ### Installation
 
 ```bash
-# Install from PyPI (recommended)
+# Complete installation - CLI + GUI + API (recommended)
 pip install databroom
+
+# CLI + API only (no Streamlit GUI)
+pip install databroom[cli]
+
+# GUI + API only (no CLI interface)  
+pip install databroom[gui]
 ```
 
 ### Command Line Interface (Primary Interface)
@@ -402,7 +408,7 @@ mypy databroom/
 - Interactive Streamlit GUI with live preview
 - Programmatic API with method chaining
 - Python and R code generation
-- Comprehensive test suite (83 tests, 69 passing)
+- Comprehensive test suite
 - PyPI package distribution ready
 - - Dinamic new operations load
 

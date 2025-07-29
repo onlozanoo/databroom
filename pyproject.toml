@@ -45,30 +45,28 @@ dependencies = [
     "streamlit>=1.28.0",
     "unidecode>=1.3.0",
     "jinja2>=3.0.0",
-    "pathlib2>=2.3.0"
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "black>=22.0.0",
-    "isort>=5.10.0",
-    "flake8>=5.0.0",
-    "mypy>=0.991",
-    "pre-commit>=2.20.0"
-]
-cli = [
+    "pathlib2>=2.3.0",
     "typer>=0.7.0",
     "rich>=12.0.0"
 ]
-reports = [
+
+[project.optional-dependencies]
+cli = [
+    "pandas>=1.3.0",
+    "numpy>=1.20.0", 
+    "unidecode>=1.3.0",
     "jinja2>=3.0.0",
-    "plotly>=5.0.0",
-    "kaleido>=0.2.1"
+    "pathlib2>=2.3.0",
+    "typer>=0.7.0",
+    "rich>=12.0.0"
 ]
-all = [
-    "databroom[dev,cli,reports]"
+gui = [
+    "pandas>=1.3.0",
+    "numpy>=1.20.0",
+    "streamlit>=1.28.0", 
+    "unidecode>=1.3.0",
+    "jinja2>=3.0.0",
+    "pathlib2>=2.3.0"
 ]
 
 [project.urls]
