@@ -79,7 +79,7 @@ Issues = "https://github.com/onlozanoo/janitor_bot/issues"
 Changelog = "https://github.com/onlozanoo/janitor_bot/releases"
 
 [project.scripts]
-janitor_bot = "janitor_bot.cli.main:app"
+janitor_bot = "janitor_bot.cli.main:cli_main"
 
 [project.gui-scripts]
 janitor_gui = "janitor_bot.gui.app:main"

@@ -1,0 +1,5 @@
+[console_scripts]
+janitor_bot = janitor_bot.cli.main:app
+
+[gui_scripts]
+janitor_gui = janitor_bot.gui.app:main
