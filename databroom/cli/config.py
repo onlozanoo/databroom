@@ -1,17 +1,17 @@
-# janitor_bot/cli/config.py
+# databroom/cli/config.py
 
 import inspect
 from typing import Dict, List, Any, Union
-from janitor_bot.core import cleaning_ops
-from janitor_bot.core.janitor import Janitor
+from databroom.core import cleaning_ops
+from databroom.core.broom import Broom
 
 # Obtener funciones disponibles dinámicamente (igual que pipeline.py)
 available_functions = [name for name, obj in inspect.getmembers(cleaning_ops, inspect.isfunction)]
 
-# Obtener métodos de Janitor que correspondan a funciones de cleaning_ops
-janitor_methods = [name for name in dir(Janitor) 
+# Obtener métodos de Broom que correspondan a funciones de cleaning_ops
+Broom_methods = [name for name in dir(Broom) 
                    if not name.startswith('_') 
-                   and callable(getattr(Janitor, name))
+                   and callable(getattr(Broom, name))
                    and name in available_functions]
 
 def extract_function_params(func) -> Dict[str, Any]:
@@ -41,7 +41,7 @@ def extract_docstring_summary(func) -> str:
 
 # Mapeo automático de operaciones con introspección completa
 CLEANING_OPERATIONS = {}
-for method_name in janitor_methods:
+for method_name in Broom_methods:
     # Obtener función correspondiente en cleaning_ops
     func = getattr(cleaning_ops, method_name)
     

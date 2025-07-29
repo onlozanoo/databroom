@@ -1,4 +1,4 @@
-# janitor_bot/core/cleaning_ops.py
+# databroom/core/cleaning_ops.py
 
 import pandas as pd
 import unicodedata

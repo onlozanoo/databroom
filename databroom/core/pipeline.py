@@ -1,8 +1,8 @@
 # pipeline.py
 
-from janitor_bot.core.history_tracker import CleaningCommand
-from janitor_bot.core.debug_logger import debug_log
-from janitor_bot.core import cleaning_ops
+from databroom.core.history_tracker import CleaningCommand
+from databroom.core.debug_logger import debug_log
+from databroom.core import cleaning_ops
 import inspect
 
 # Get the function names in cleaning_ops

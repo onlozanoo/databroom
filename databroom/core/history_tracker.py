@@ -1,12 +1,12 @@
 """
-janitor_bot/core/history_tracker.py
+databroom/core/history_tracker.py
 
 This module provides decorators for automatically tracking data cleaning operations.
 The main decorator captures metadata about DataFrame transformations for reproducibility.
 """
 
 from datetime import datetime
-from janitor_bot.core.debug_logger import debug_log
+from databroom.core.debug_logger import debug_log
 import pandas as pd
 
 

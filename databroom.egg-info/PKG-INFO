@@ -1,3 +1,57 @@
+Metadata-Version: 2.4
+Name: databroom
+Version: 0.3.0
+Summary: A cross-language DataFrame cleaning assistant with interactive GUI and one-click code export
+Author-email: Oliver Lozano <onlozanoo@gmail.com>
+Maintainer-email: Oliver Lozano <onlozanoo@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/onlozanoo/databroom
+Project-URL: Documentation, https://github.com/onlozanoo/databroom/blob/main/README.md
+Project-URL: Repository, https://github.com/onlozanoo/databroom
+Project-URL: Issues, https://github.com/onlozanoo/databroom/issues
+Project-URL: Changelog, https://github.com/onlozanoo/databroom/releases
+Keywords: data-cleaning,pandas,streamlit,data-preprocessing,code-generation,gui,dataframe
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
+Classifier: Topic :: Software Development :: Code Generators
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandas>=1.3.0
+Requires-Dist: numpy>=1.20.0
+Requires-Dist: streamlit>=1.28.0
+Requires-Dist: unidecode>=1.3.0
+Requires-Dist: jinja2>=3.0.0
+Requires-Dist: pathlib2>=2.3.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: isort>=5.10.0; extra == "dev"
+Requires-Dist: flake8>=5.0.0; extra == "dev"
+Requires-Dist: mypy>=0.991; extra == "dev"
+Requires-Dist: pre-commit>=2.20.0; extra == "dev"
+Provides-Extra: cli
+Requires-Dist: typer>=0.7.0; extra == "cli"
+Requires-Dist: rich>=12.0.0; extra == "cli"
+Provides-Extra: reports
+Requires-Dist: jinja2>=3.0.0; extra == "reports"
+Requires-Dist: plotly>=5.0.0; extra == "reports"
+Requires-Dist: kaleido>=0.2.1; extra == "reports"
+Provides-Extra: all
+Requires-Dist: databroom[cli,dev,reports]; extra == "all"
+Dynamic: license-file
+
 # 🧹 Databroom
 
 *A powerful DataFrame cleaning tool with **Command Line Interface**, **Interactive GUI**, and **Programmatic API** - automatically generates reproducible **Python/pandas** and **R/tidyverse** code.*
@@ -65,7 +119,7 @@ databroom gui
 Use Databroom directly in your Python scripts:
 
 ```python
-from databroom.core.broom import Broom
+from databroom.core.janitor import Broom
 
 # Load and clean data with method chaining
 broom = Broom.from_csv('data.csv')

@@ -6,7 +6,7 @@ jinja2>=3.0.0
 pathlib2>=2.3.0
 
 [all]
-janitor_bot[cli,dev,reports]
+databroom[cli,dev,reports]
 
 [cli]
 typer>=0.7.0

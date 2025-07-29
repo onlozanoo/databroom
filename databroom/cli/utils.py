@@ -1,4 +1,4 @@
-# janitor_bot/cli/utils.py
+# databroom/cli/utils.py
 
 import os
 from pathlib import Path
@@ -7,8 +7,8 @@ import pandas as pd
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from janitor_bot.core.janitor import Janitor
-from janitor_bot.generators.base import CodeGenerator
+from databroom.core.broom import Broom
+from databroom.generators.base import CodeGenerator
 from .config import (
     FILE_TYPE_MAPPING, 
     SUPPORTED_INPUT_FORMATS, 
@@ -62,12 +62,12 @@ def validate_output_file(file_path: str) -> bool:
     
     return True
 
-def load_dataframe(file_path: str, **kwargs) -> Optional[Janitor]:
-    """Carga DataFrame usando factory methods de Janitor"""
+def load_dataframe(file_path: str, **kwargs) -> Optional[Broom]:
+    """Carga DataFrame usando factory methods de Broom"""
     try:
-        # Auto-detección usando el método from_file de Janitor
-        janitor = Janitor.from_file(file_path, **kwargs)
-        return janitor
+        # Auto-detección usando el método from_file de Broom
+        broom = Broom.from_file(file_path, **kwargs)
+        return broom
     except Exception as e:
         console.print(f"Error loading file: {e}", style="red")
         return None
@@ -94,7 +94,7 @@ def save_dataframe(df: pd.DataFrame, output_path: str) -> bool:
         console.print(f"Error saving file: {e}", style="red")
         return False
 
-def generate_and_save_code(janitor: Janitor, output_path: str, language: str) -> bool:
+def generate_and_save_code(broom: Broom, output_path: str, language: str) -> bool:
     """Genera y guarda código usando CodeGenerator"""
     try:
         # Normalizar idioma
@@ -107,7 +107,7 @@ def generate_and_save_code(janitor: Janitor, output_path: str, language: str) ->
         
         # Generar código usando plantillas Jinja2
         generator = CodeGenerator(language=lang)
-        generator.load_history(janitor.get_history())
+        generator.load_history(broom.get_history())
         generator.export_code(output_path)
         
         console.print(MESSAGES['saved_code'].format(path=output_path), style="green")

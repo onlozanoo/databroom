@@ -1,9 +1,9 @@
-# janitor_bot/cli/operations.py
+# databroom/cli/operations.py
 
 from typing import Dict, List, Any, Tuple
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from janitor_bot.core.janitor import Janitor
+from databroom.core.broom import Broom
 from .config import CLEANING_OPERATIONS, MESSAGES
 
 console = Console()
@@ -11,11 +11,11 @@ console = Console()
 class OperationApplier:
     """Maneja la aplicación dinámica de operaciones de limpieza"""
     
-    def __init__(self, janitor: Janitor, verbose: bool = False):
-        self.janitor = janitor
+    def __init__(self, broom: Broom, verbose: bool = False):
+        self.broom = Broom
         self.verbose = verbose
         self.operations_applied = []
-        self.df_before = janitor.get_df().copy()
+        self.df_before = broom.get_df().copy()
     
     def apply_operations(self, operation_flags: Dict[str, bool], 
                         operation_params: Dict[str, Any]) -> List[str]:

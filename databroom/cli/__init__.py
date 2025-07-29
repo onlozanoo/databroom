@@ -1,4 +1,4 @@
-# janitor_bot/cli/__init__.py
+# databroom/cli/__init__.py
 
 """
 CLI module for Janitor Bot

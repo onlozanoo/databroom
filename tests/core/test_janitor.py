@@ -8,13 +8,13 @@ if __name__ == "__main__" and __package__ is None:
     import os
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from janitor_bot.core.janitor import Janitor
+from databroom.core.broom import Broom
 
 class TestJanitorInitialization:
     def test_from_dataframe_initialization(self, sample_clean_data):
         """Test Janitor initialization with DataFrame."""
         # Act
-        janitor = Janitor(sample_clean_data)
+        janitor = Broom(sample_clean_data)
         
         # Assert
         assert janitor.get_df().shape == sample_clean_data.shape
@@ -24,7 +24,7 @@ class TestJanitorInitialization:
     def test_from_csv_file(self, temp_csv_file):
         """Test Janitor initialization from CSV file."""
         # Act
-        janitor = Janitor.from_csv(temp_csv_file)
+        janitor = Broom.from_csv(temp_csv_file)
         
         # Assert
         df = janitor.get_df()
@@ -35,7 +35,7 @@ class TestJanitorInitialization:
     def test_from_csv_with_kwargs(self, temp_csv_file):
         """Test Janitor initialization from CSV with additional parameters."""
         # Act
-        janitor = Janitor.from_csv(temp_csv_file, encoding='utf-8')
+        janitor = Broom.from_csv(temp_csv_file, encoding='utf-8')
         
         # Assert
         df = janitor.get_df()
@@ -44,7 +44,7 @@ class TestJanitorInitialization:
     def test_from_file_auto_detection(self, temp_csv_file):
         """Test automatic file type detection."""
         # Act
-        janitor = Janitor.from_file(temp_csv_file)
+        janitor = Broom.from_file(temp_csv_file)
         
         # Assert
         df = janitor.get_df()
@@ -61,7 +61,7 @@ class TestJanitorInitialization:
         excel_file = test_data_dir / "sample.xlsx"
         
         # Act
-        janitor = Janitor.from_excel(excel_file)
+        janitor = Broom.from_excel(excel_file)
         
         # Assert
         df = janitor.get_df()
@@ -75,7 +75,7 @@ class TestJanitorInitialization:
         json_file = test_data_dir / "sample.json"
         
         # Act
-        janitor = Janitor.from_json(json_file)
+        janitor = Broom.from_json(json_file)
         
         # Assert
         df = janitor.get_df()
@@ -87,7 +87,7 @@ class TestJanitorOperations:
     def test_remove_empty_cols_operation(self, sample_dirty_data):
         """Test remove_empty_cols operation."""
         # Arrange
-        janitor = Janitor(sample_dirty_data)
+        janitor = Broom(sample_dirty_data)
         original_cols = len(janitor.get_df().columns)
         
         # Act
@@ -103,7 +103,7 @@ class TestJanitorOperations:
     def test_remove_empty_rows_operation(self, sample_dirty_data):
         """Test remove_empty_rows operation."""
         # Arrange
-        janitor = Janitor(sample_dirty_data)
+        janitor = Broom(sample_dirty_data)
         
         # Act
         result = janitor.remove_empty_rows()
@@ -116,7 +116,7 @@ class TestJanitorOperations:
     def test_standardize_column_names_operation(self, sample_dirty_data):
         """Test standardize_column_names operation."""
         # Arrange
-        janitor = Janitor(sample_dirty_data)
+        janitor = Broom(sample_dirty_data)
         
         # Act
         result = janitor.standardize_column_names()
@@ -133,7 +133,7 @@ class TestJanitorOperations:
     def test_normalize_column_names_operation(self, sample_dirty_data):
         """Test normalize_column_names operation."""
         # Arrange
-        janitor = Janitor(sample_dirty_data)
+        janitor = Broom(sample_dirty_data)
         
         # Act
         result = janitor.normalize_column_names()
@@ -147,7 +147,7 @@ class TestJanitorChaining:
     def test_method_chaining(self, sample_dirty_data):
         """Test that methods can be chained together."""
         # Arrange
-        janitor = Janitor(sample_dirty_data)
+        janitor = Broom(sample_dirty_data)
         original_shape = janitor.get_df().shape
         
         # Act
@@ -168,7 +168,7 @@ class TestJanitorChaining:
     def test_chaining_preserves_data_integrity(self, sample_clean_data):
         """Test that chaining operations preserves data integrity."""
         # Arrange
-        janitor = Janitor(sample_clean_data)
+        janitor = Broom(sample_clean_data)
         original_data_count = len(janitor.get_df())
         
         # Act
@@ -186,7 +186,7 @@ class TestJanitorHistory:
     def test_history_tracking(self, sample_clean_data):
         """Test that operation history is properly tracked."""
         # Arrange
-        janitor = Janitor(sample_clean_data)
+        janitor = Broom(sample_clean_data)
         
         # Act
         janitor.remove_empty_cols(threshold=0.5)
@@ -203,7 +203,7 @@ class TestJanitorHistory:
     def test_history_contains_parameters(self, sample_clean_data):
         """Test that history contains operation parameters."""
         # Arrange
-        janitor = Janitor(sample_clean_data)
+        janitor = Broom(sample_clean_data)
         
         # Act
         janitor.remove_empty_cols(threshold=0.7)
@@ -216,7 +216,7 @@ class TestJanitorHistory:
     def test_get_history_returns_copy(self, sample_clean_data):
         """Test that get_history returns a copy, not reference."""
         # Arrange
-        janitor = Janitor(sample_clean_data)
+        janitor = Broom(sample_clean_data)
         janitor.remove_empty_cols()
         
         # Act
@@ -232,7 +232,7 @@ class TestJanitorEdgeCases:
     def test_empty_dataframe(self, empty_dataframe):
         """Test Janitor with empty DataFrame."""
         # Act
-        janitor = Janitor(empty_dataframe)
+        janitor = Broom(empty_dataframe)
         
         # Assert
         assert janitor.get_df().shape == (0, 0)
@@ -242,7 +242,7 @@ class TestJanitorEdgeCases:
     def test_single_row_dataframe(self, single_row_data):
         """Test Janitor with single row DataFrame."""
         # Act
-        janitor = Janitor(single_row_data)
+        janitor = Broom(single_row_data)
         result = janitor.remove_empty_cols(threshold=0.5)
         
         # Assert
@@ -254,7 +254,7 @@ class TestJanitorEdgeCases:
     def test_operations_on_empty_dataframe(self, empty_dataframe):
         """Test that operations on empty DataFrame don't crash."""
         # Arrange
-        janitor = Janitor(empty_dataframe)
+        janitor = Broom(empty_dataframe)
         
         # Act & Assert - should not raise exceptions
         result = janitor.standardize_column_names()

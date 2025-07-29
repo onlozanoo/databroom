@@ -14,7 +14,7 @@ class TestJinja2Templates:
     def templates_dir(self):
         """Get the templates directory path."""
         current_dir = Path(__file__).parent.parent.parent
-        return current_dir / "janitor_bot" / "generators" / "templates"
+        return current_dir / "databroom" / "generators" / "templates"
 
     @pytest.fixture
     def jinja_env(self, templates_dir):
@@ -53,7 +53,7 @@ class TestPythonTemplate:
     def templates_dir(self):
         """Get the templates directory path."""
         current_dir = Path(__file__).parent.parent.parent
-        return current_dir / "janitor_bot" / "generators" / "templates"
+        return current_dir / "databroom" / "generators" / "templates"
 
     @pytest.fixture
     def jinja_env(self, templates_dir):
@@ -80,7 +80,7 @@ class TestPythonTemplate:
         # Assert
         assert len(result) > 0
         assert "import pandas as pd" in result
-        assert "from janitor_bot.core.janitor import Janitor" in result
+        assert "from databroom.core.broom import Broom" in result
 
     def test_python_template_includes_required_imports(self, jinja_env):
         """Test that Python template includes all required imports."""
@@ -97,8 +97,8 @@ class TestPythonTemplate:
         
         # Assert
         assert "import pandas as pd" in result
-        assert "from janitor_bot.core.janitor import Janitor" in result
-        assert "pip install janitor_bot" in result
+        assert "from databroom.core.broom import Broom" in result
+        assert "pip install databroom" in result
 
     def test_python_template_includes_dynamic_content(self, jinja_env):
         """Test that Python template includes dynamic content."""
@@ -164,7 +164,7 @@ class TestMacrosTemplate:
     def templates_dir(self):
         """Get the templates directory path."""
         current_dir = Path(__file__).parent.parent.parent
-        return current_dir / "janitor_bot" / "generators" / "templates"
+        return current_dir / "databroom" / "generators" / "templates"
 
     @pytest.fixture
     def jinja_env(self, templates_dir):
@@ -230,7 +230,7 @@ class TestRTemplate:
     def templates_dir(self):
         """Get the templates directory path."""
         current_dir = Path(__file__).parent.parent.parent
-        return current_dir / "janitor_bot" / "generators" / "templates"
+        return current_dir / "databroom" / "generators" / "templates"
 
     @pytest.fixture
     def jinja_env(self, templates_dir):
@@ -276,7 +276,7 @@ class TestTemplateIntegration:
     def templates_dir(self):
         """Get the templates directory path."""
         current_dir = Path(__file__).parent.parent.parent
-        return current_dir / "janitor_bot" / "generators" / "templates"
+        return current_dir / "databroom" / "generators" / "templates"
 
     @pytest.fixture
     def jinja_env(self, templates_dir):

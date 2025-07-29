@@ -7,7 +7,7 @@ if __name__ == "__main__" and __package__ is None:
     import os
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from janitor_bot.core.pipeline import CleaningPipeline
+from databroom.core.pipeline import CleaningPipeline
 
 class TestCleaningPipelineInitialization:
     def test_pipeline_initialization(self, sample_clean_data):

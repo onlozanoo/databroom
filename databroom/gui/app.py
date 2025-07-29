@@ -7,9 +7,9 @@ if __name__ == "__main__" and __package__ is None:
     import os
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from janitor_bot.core.janitor import Janitor
-from janitor_bot.core.debug_logger import debug_log, get_current_log_file
-from janitor_bot.generators.base import CodeGenerator
+from databroom.core.broom import Broom
+from databroom.core.debug_logger import debug_log, get_current_log_file
+from databroom.generators.base import CodeGenerator
 
 def main():
     debug_log("Starting Janitor Bot application", "GUI")
@@ -117,7 +117,7 @@ def main():
                 try:
                     debug_log("Creating Janitor instance from uploaded file...", "GUI")
                     # Create Janitor instance
-                    janitor = Janitor.from_file(uploaded_file)
+                    janitor = Broom.from_file(uploaded_file)
                     debug_log("Janitor instance created successfully", "GUI")
                     
                     debug_log("Storing in session state...", "GUI")

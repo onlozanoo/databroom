@@ -1,4 +1,4 @@
-# janitor_bot/cli/commands.py
+# databroom/cli/commands.py
 
 import typer
 from typing import Optional, Dict, Any, Annotated
@@ -206,14 +206,14 @@ def list_operations():
     console.print("[bold yellow]Use multiple flags to chain operations together![/bold yellow]")
     console.print("\n[bold cyan]Quick Examples:[/bold cyan]")
     console.print("  [dim]# Basic column cleaning[/dim]")
-    console.print("  [green]janitor_bot clean[/green] [cyan]data.csv[/cyan] [blue]--standardize-column-names --output-file clean.csv[/blue]")
+    console.print("  [green]databroom clean[/green] [cyan]data.csv[/cyan] [blue]--standardize-column-names --output-file clean.csv[/blue]")
     console.print()
     console.print("  [dim]# Multiple operations with code generation[/dim]")
-    console.print("  [green]janitor_bot clean[/green] [cyan]messy.xlsx[/cyan] [blue]--remove-empty-cols --normalize-values[/blue] \\")
+    console.print("  [green]databroom clean[/green] [cyan]messy.xlsx[/cyan] [blue]--remove-empty-cols --normalize-values[/blue] \\")
     console.print("                    [blue]--output-code script.py --verbose[/blue]")
     console.print()
     console.print("  [dim]# Custom threshold with R output[/dim]")
-    console.print("  [green]janitor_bot clean[/green] [cyan]dataset.json[/cyan] [blue]--remove-empty-cols[/blue] [red]--remove-empty-cols-threshold 0.7[/red] \\")
+    console.print("  [green]databroom clean[/green] [cyan]dataset.json[/cyan] [blue]--remove-empty-cols[/blue] [red]--remove-empty-cols-threshold 0.7[/red] \\")
     console.print("                    [blue]--output-code analysis.R --lang r[/blue]")
     console.print()
     console.print("[bold green]Tip:[/bold green] Use [yellow]--help[/yellow] on any command for detailed examples and documentation!")
@@ -265,16 +265,16 @@ def gui_command(
     [bold cyan]Examples:[/bold cyan]
     
         [dim]# Launch GUI on default port[/dim]
-        [green]janitor_bot gui[/green]
+        [green]databroom gui[/green]
         
         [dim]# Use custom port[/dim]
-        [green]janitor_bot gui[/green] [blue]--port 8502[/blue]
+        [green]databroom gui[/green] [blue]--port 8502[/blue]
         
         [dim]# Launch without opening browser[/dim]
-        [green]janitor_bot gui[/green] [red]--no-browser[/red]
+        [green]databroom gui[/green] [red]--no-browser[/red]
         
         [dim]# Show detailed server logs[/dim]
-        [green]janitor_bot gui[/green] [yellow]--verbose[/yellow]
+        [green]databroom gui[/green] [yellow]--verbose[/yellow]
     """
     import subprocess
     import sys
@@ -284,7 +284,7 @@ def gui_command(
     # Configurar puerto
     server_port = port or 8501
     
-    console.print("[bold magenta]Launching Janitor Bot GUI...[/bold magenta]")
+    console.print("[bold magenta]Launching Databroom GUI...[/bold magenta]")
     
     # Encontrar la ruta del archivo GUI
     try:

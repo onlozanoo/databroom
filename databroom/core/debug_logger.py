@@ -38,7 +38,7 @@ class DebugLogger:
         
         # Write initial header
         with open(log_path, 'w', encoding='utf-8') as f:
-            f.write(f"=== Janitor Bot Debug Log ===\n")
+            f.write(f"=== Broom Bot Debug Log ===\n")
             f.write(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write(f"{'='*50}\n\n")
         

@@ -8,7 +8,7 @@ if __name__ == "__main__" and __package__ is None:
     import os
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from janitor_bot.core.cleaning_ops import (
+from databroom.core.cleaning_ops import (
     remove_empty_cols, 
     remove_empty_rows,
     standardize_column_names,

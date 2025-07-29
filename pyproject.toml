@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "janitor_bot"
+name = "databroom"
 version = "0.3.0"
 description = "A cross-language DataFrame cleaning assistant with interactive GUI and one-click code export"
 readme = "README.md"
@@ -68,27 +68,27 @@ reports = [
     "kaleido>=0.2.1"
 ]
 all = [
-    "janitor_bot[dev,cli,reports]"
+    "databroom[dev,cli,reports]"
 ]
 
 [project.urls]
-Homepage = "https://github.com/onlozanoo/janitor_bot"
-Documentation = "https://github.com/onlozanoo/janitor_bot/blob/main/README.md"
-Repository = "https://github.com/onlozanoo/janitor_bot"
-Issues = "https://github.com/onlozanoo/janitor_bot/issues"
-Changelog = "https://github.com/onlozanoo/janitor_bot/releases"
+Homepage = "https://github.com/onlozanoo/databroom"
+Documentation = "https://github.com/onlozanoo/databroom/blob/main/README.md"
+Repository = "https://github.com/onlozanoo/databroom"
+Issues = "https://github.com/onlozanoo/databroom/issues"
+Changelog = "https://github.com/onlozanoo/databroom/releases"
 
 [project.scripts]
-janitor_bot = "janitor_bot.cli.main:cli_main"
+databroom = "databroom.cli.main:cli_main"
 
 [project.gui-scripts]
-janitor_gui = "janitor_bot.gui.app:main"
+databroom_gui = "databroom.gui.app:main"
 
 [tool.setuptools]
-packages = ["janitor_bot"]
+packages = ["databroom"]
 
 [tool.setuptools.package-data]
-janitor_bot = [
+databroom = [
     "generators/templates/*.j2",
     "generators/templates/*.html",
     "gui/static/*",
@@ -117,7 +117,7 @@ extend-exclude = '''
 profile = "black"
 multi_line_output = 3
 line_length = 88
-known_first_party = ["janitor_bot"]
+known_first_party = ["databroom"]
 
 [tool.mypy]
 python_version = "3.8"
@@ -158,7 +158,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["janitor_bot"]
+source = ["databroom"]
 omit = [
     "*/tests/*",
     "*/test_*",

@@ -23,7 +23,7 @@ if __name__ == "__main__":# and __package__ is None:
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
 
-from janitor_bot.core.janitor import Janitor 
+from databroom.core.broom import Broom 
 
 class CodeGenerator:
     def __init__(self, language):
@@ -88,7 +88,7 @@ class CodeGenerator:
                 
                 # Build the code line
                 if code == "":
-                    code = f"janitor_instance = janitor_instance.{func}({params_formatted})"
+                    code = f"broom_instance = broom_instance.{func}({params_formatted})"
                 else:
                     code += f".{func}({params_formatted})"
         
@@ -179,8 +179,8 @@ class CodeGenerator:
 if __name__ == "__main__":
     
     # Example usage
-    # Assuming Janitor class and its methods are defined in janitor_bot.core.janitor
-    test_df = Janitor.from_excel(r'Z:\Direccion Comercial\Informes\18-07-2025.xlsx')
+    # Assuming Broom class and its methods are defined in databroom.core.broom
+    test_df = Broom.from_excel(r'Z:\Direccion Comercial\Informes\18-07-2025.xlsx')
     test_df = test_df.remove_empty_cols(threshold=0.9).standardize_column_names().normalize_column_names().standardize_values()
     code = CodeGenerator('R')
     #print(test_df.get_history())
@@ -189,4 +189,4 @@ if __name__ == "__main__":
     #print(history)
 
     print(code.generate_code())
-    code.export_code(r'C:\Users\Olive\Documents\Proyectos DS\Janitor\janitor_bot\test_generated_pipeline.R')
+    code.export_code(r'C:\Users\Olive\Documents\Proyectos DS\Janitor\databroom\test_generated_pipeline.R')

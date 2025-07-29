@@ -9,7 +9,7 @@ if __name__ == "__main__" and __package__ is None:
     import os
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from janitor_bot.generators.base import CodeGenerator
+from databroom.generators.base import CodeGenerator
 
 class TestCodeGeneratorInitialization:
     def test_python_generator_initialization(self):
@@ -200,7 +200,7 @@ class TestCodeExport:
             with open(temp_path, 'r') as f:
                 content = f.read()
             assert 'import pandas as pd' in content
-            assert 'from janitor_bot.core.janitor import Janitor' in content
+            assert 'from databroom.core.broom import Broom' in content
             assert 'remove_empty_cols(threshold=0.9)' in content
             
         finally:
