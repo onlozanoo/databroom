@@ -21,7 +21,7 @@
     - [**Real-world Comparison**](#real-world-comparison)
     - [**When to Use Databroom**](#when-to-use-databroom)
   - [🚀 Quick Start](#-quick-start)
-    - [Installation](#installation)
+    - [🧪 Installation](#-installation)
     - [Command Line Interface (Primary Interface)](#command-line-interface-primary-interface)
     - [Interactive GUI](#interactive-gui)
     - [GUI Screenshots](#gui-screenshots)
@@ -46,6 +46,7 @@
   - [🤝 Contributing](#-contributing)
     - [**Ways to Contribute**](#ways-to-contribute)
   - [📄 License](#-license)
+  - [🔗 Links](#-links)
 
 ---
 
@@ -172,21 +173,63 @@ databroom clean survey_data.xlsx \
 
 ## 🚀 Quick Start
 
-### Installation
+### 🧪 Installation
 
+**🎯 Recommended: Using a Virtual Environment (avoids path issues, safer install)**
 ```bash
-# Complete installation - CLI + GUI + API (recommended)
+# Create and activate virtual environment
+python -m venv venv
+
+# Activate environment
+# On Linux/Mac:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
+
+# Full installation - CLI + GUI + API
 pip install databroom
 
 # Verify installation
 databroom --version
+databroom --help
 
+```
+
+**🔧 Installation Options:**
+```bash
 # CLI + API only (no Streamlit GUI)
 pip install databroom[cli]
 
 # GUI + API only (no CLI interface)  
 pip install databroom[gui]
 ```
+
+**⚠️ CLI not found after install? Don’t panic.**
+
+
+Sometimes, depending on your Python setup or OS, the CLI command (databroom) might not be immediately recognized. Here are foolproof ways to run it:
+
+**✅ Option 1: Run as Python module (always works)**
+```bash
+python -m databroom.cli.main --help
+python -m databroom.cli.main clean data.csv --clean-all
+```
+
+**✅ Option 2: Use pipx for isolated CLI tools**
+``` bash
+pip install pipx
+pipx install databroom
+# Then:
+databroom clean data.csv --clean-all
+```
+
+**✅ Option 3: Activate your virtual environment (if not already)**
+Make sure you're in your venv, and try again:
+```bash
+databroom --help
+```
+
+🧹 Tip: Global installs of Python tools can run into path conflicts. Using pipx or a virtual environment makes everything more stable and predictable.
 
 ### Command Line Interface (Primary Interface)
 
