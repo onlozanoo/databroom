@@ -178,6 +178,9 @@ databroom clean survey_data.xlsx \
 # Complete installation - CLI + GUI + API (recommended)
 pip install databroom
 
+# Verify installation
+databroom --version
+
 # CLI + API only (no Streamlit GUI)
 pip install databroom[cli]
 
@@ -450,16 +453,17 @@ mypy databroom/
 
 ## 📈 Project Status
 
-**Current Version**: v0.3.0 - **Production Ready**
+**Current Version**: v0.3.1 - **Production Ready & Live on PyPI**
 
 ✅ **Fully Implemented**
-- Complete CLI with all cleaning operations
+- **Smart Operations**: `--clean-all`, `--clean-columns`, `--clean-rows`
+- Complete CLI with simplified and legacy operations
 - Interactive Streamlit GUI with live preview
 - Programmatic API with method chaining
-- Python and R code generation
+- Python and R code generation with parameter filtering
 - Comprehensive test suite
-- PyPI package distribution ready
-- - Dinamic new operations load
+- **Live on PyPI**: `pip install databroom`
+- Dynamic new operations loading system
 
 🚧 **In Active Development**  
 - Extended cleaning operations library
@@ -469,12 +473,12 @@ mypy databroom/
 
 📋 **Planned Features**
 - Preview in CLI
-- Presets
-- Batch transform
-- Save/load cleaning pipelines
-- Custom cleaning operation plugins  
-- Integration with popular data tools
-- Advanced reporting capabilities
+- Configuration presets and templates
+- Enhanced batch processing workflows
+- Save/load cleaning pipelines as JSON
+- Custom cleaning operation plugins system
+- Integration with pandas-profiling and data validation tools
+- Advanced data quality reporting and metrics
 
 ---
 
@@ -494,5 +498,14 @@ I welcome contributions! Here's how you can help:
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🔗 Links
+
+- **PyPI Package**: https://pypi.org/project/databroom/
+- **GitHub Repository**: https://github.com/onlozanoo/databroom
+- **Documentation**: This README
+- **Issues & Support**: https://github.com/onlozanoo/databroom/issues
 
 *Built with ❤️ for the data science community*

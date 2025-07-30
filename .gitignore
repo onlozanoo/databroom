@@ -1,3 +1,4 @@
+.gitignore
 .claude
 .github
 docs
@@ -15,5 +16,10 @@ CLAUDE.md.save
 test_generated_pipeline.py
 test_clean.csv
 *.egg-info/
-build/
+build*
+dist/
 databroom.egg-info/
+test_env/
+test*
+generated*.py
+README_PYPI.md

@@ -1,5 +1,0 @@
-[console_scripts]
-databroom = databroom.cli.main:cli_main
-
-[gui_scripts]
-databroom_gui = databroom.gui.app:main

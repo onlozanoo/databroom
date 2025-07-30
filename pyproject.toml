@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "databroom"
-version = "0.3.0"
+version = "0.3.1"
 description = "A cross-language DataFrame cleaning assistant with interactive GUI and one-click code export"
-readme = "README.md"
+readme = "README_PYPI.md"
 license = {text = "MIT"}
 authors = [
     {name = "Oliver Lozano", email = "onlozanoo@gmail.com"}
@@ -83,7 +83,7 @@ databroom = "databroom.cli.main:cli_main"
 databroom_gui = "databroom.gui.app:main"
 
 [tool.setuptools]
-packages = ["databroom"]
+packages = ["databroom", "databroom.cli", "databroom.core", "databroom.gui", "databroom.generators"]
 
 [tool.setuptools.package-data]
 databroom = [
