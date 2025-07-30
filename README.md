@@ -6,6 +6,11 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+
+<p align='center'>
+<img width="612" height="612" alt="Image" src="https://github.com/user-attachments/assets/33b7c8fe-4aee-4459-ab68-61ff4004ac98" />
+</p>
+
 ## 📑 Table of Contents
 
 - [🧹 Databroom](#-databroom)
