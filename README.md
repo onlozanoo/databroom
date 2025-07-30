@@ -1,10 +1,46 @@
 # 🧹 Databroom
 
-*A powerful DataFrame cleaning tool with **Command Line Interface**, **Interactive GUI**, and **Programmatic API** - automatically generates reproducible **Python/pandas** and **R/tidyverse** code.*
+*A powerful DataFrame cleaning tool with **Command Line Interface**, **Interactive GUI**, and **Programmatic API** - automatically generates reproducible **Python/pandas**, **R/tidyverse** code, and **CLI** Commands*
 
 [![PyPI version](https://badge.fury.io/py/databroom.svg)](https://pypi.org/project/databroom/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+## 📑 Table of Contents
+
+- [🧹 Databroom](#-databroom)
+  - [📑 Table of Contents](#-table-of-contents)
+  - [🆚 Why Databroom?](#-why-databroom)
+    - [**The Problem: Manual Data Cleaning is Tedious**](#the-problem-manual-data-cleaning-is-tedious)
+    - [**The Benefits**](#the-benefits)
+    - [**Real-world Comparison**](#real-world-comparison)
+    - [**When to Use Databroom**](#when-to-use-databroom)
+  - [🚀 Quick Start](#-quick-start)
+    - [Installation](#installation)
+    - [Command Line Interface (Primary Interface)](#command-line-interface-primary-interface)
+    - [Interactive GUI](#interactive-gui)
+    - [GUI Screenshots](#gui-screenshots)
+    - [Programmatic API](#programmatic-api)
+  - [✨ Features](#-features)
+    - [**🖥️ Command Line Interface**](#️-command-line-interface)
+    - [**🎨 Interactive GUI**](#-interactive-gui)
+    - [**⚙️ Programmatic API**](#️-programmatic-api)
+    - [**🔄 Code Generation**](#-code-generation)
+  - [🧰 Available Cleaning Operations](#-available-cleaning-operations)
+    - [CLI Parameters](#cli-parameters)
+  - [📊 Example Workflows](#-example-workflows)
+    - [**Data Science Pipeline**](#data-science-pipeline)
+    - [**R/Tidyverse Workflow**](#rtidyverse-workflow)
+    - [**Batch Processing Setup**](#batch-processing-setup)
+  - [🏗️ Architecture](#️-architecture)
+  - [🛠️ Development](#️-development)
+    - [Local Development](#local-development)
+    - [Testing](#testing)
+    - [Code Quality](#code-quality)
+  - [📈 Project Status](#-project-status)
+  - [🤝 Contributing](#-contributing)
+    - [**Ways to Contribute**](#ways-to-contribute)
+  - [📄 License](#-license)
 
 ---
 
