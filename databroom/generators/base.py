@@ -31,6 +31,30 @@ class CodeGenerator:
         self.history = {}
         self.templates, self.templates_path = self._load_templates()
         
+        # Define default values for each function to omit them from generated code
+        self.function_defaults = {
+            'clean_columns': {
+                'remove_empty': True,
+                'empty_threshold': 0.9,
+                'snake_case': True,
+                'remove_accents': True
+            },
+            'clean_rows': {
+                'remove_empty': True,
+                'clean_text': True,
+                'remove_accents': True,
+                'snakecase': True
+            },
+            'remove_empty_cols': {
+                'threshold': 0.9
+            },
+            'remove_empty_rows': {},
+            'standardize_column_names': {},
+            'normalize_column_names': {},
+            'normalize_values': {},
+            'standardize_values': {}
+        }
+        
     def _load_templates(self):
         """
         Load code templates based on the specified language.
@@ -64,6 +88,27 @@ class CodeGenerator:
         
         
         return self.history
+     
+    def _filter_non_default_params(self, func_name, params_dict):
+        """
+        Filter out parameters that match default values to generate cleaner code.
+        
+        Args:
+            func_name (str): Name of the function
+            params_dict (dict): All parameters passed to the function
+            
+        Returns:
+            dict: Parameters that differ from defaults
+        """
+        defaults = self.function_defaults.get(func_name, {})
+        filtered_params = {}
+        
+        for key, value in params_dict.items():
+            # Only include parameter if it's different from default or not in defaults
+            if key not in defaults or defaults[key] != value:
+                filtered_params[key] = value
+                
+        return filtered_params
     
     def generate_code(self):
         """
@@ -83,8 +128,11 @@ class CodeGenerator:
                 # Convert the string to a real dict (safe with ast.literal_eval)
                 params_dict = ast.literal_eval(params_str)
                 
+                # Filter out default parameters for cleaner code
+                filtered_params = self._filter_non_default_params(func, params_dict)
+                
                 # Convert dict to string format key=value, separated by comma
-                params_formatted = ', '.join(f"{k}={repr(v)}" for k, v in params_dict.items())
+                params_formatted = ', '.join(f"{k}={repr(v)}" for k, v in filtered_params.items())
                 
                 # Build the code line
                 if code == "":
@@ -98,8 +146,11 @@ class CodeGenerator:
                 # Convert the string to a real dict (safe with ast.literal_eval)
                 params_dict = ast.literal_eval(params_str)
                 
+                # Filter out default parameters for cleaner code
+                filtered_params = self._filter_non_default_params(func, params_dict)
+                
                 # Convert Python cleaning operations to R/tidyverse equivalents
-                r_line = self._python_to_r_operation(func, params_dict)
+                r_line = self._python_to_r_operation(func, filtered_params)
                 if r_line:
                     code_lines.append(r_line)
             
@@ -141,6 +192,34 @@ class CodeGenerator:
         
         elif func_name == 'standardize_values':
             return "mutate(across(where(is.character), ~ str_to_lower(str_replace_all(., ' ', '_'))))"
+        
+        elif func_name == 'clean_columns':
+            # For clean_columns, we need to combine multiple operations
+            operations = []
+            if params.get('remove_empty', True):
+                threshold = params.get('empty_threshold', 0.9)
+                na_threshold = 1 - threshold
+                operations.append(f"select_if(~ mean(is.na(.)) < {na_threshold})")
+            if params.get('remove_accents', True):
+                operations.append("rename_with(~ stri_trans_general(., 'Latin-ASCII'))")
+            if params.get('snake_case', True):
+                operations.append("clean_names(case = 'snake')")
+            return " %>%\n  ".join(operations) if operations else "# No column operations needed"
+        
+        elif func_name == 'clean_rows':
+            # For clean_rows, we need to combine multiple operations
+            operations = []
+            if params.get('remove_empty', True):
+                operations.append("filter(!if_all(everything(), is.na))")
+            if params.get('clean_text', True):
+                if params.get('remove_accents', True):
+                    operations.append("mutate(across(where(is.character), ~ stri_trans_general(., 'Latin-ASCII')))")
+                if params.get('snakecase', True):
+                    operations.append("mutate(across(where(is.character), ~ str_to_lower(str_replace_all(., ' ', '_'))))")
+            return " %>%\n  ".join(operations) if operations else "# No row operations needed"
+        
+        elif func_name == 'clean_all':
+            return "# clean_all() combines column and row operations - see individual operations above"
         
         else:
             # For unknown operations, add a comment

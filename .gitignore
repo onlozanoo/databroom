@@ -14,3 +14,6 @@ logs
 CLAUDE.md.save
 test_generated_pipeline.py
 test_clean.csv
+*.egg-info/
+build/
+databroom.egg-info/

@@ -89,9 +89,7 @@ df.to_csv("clean_data.csv", index=False)
 **With Databroom (one command):**
 ```bash
 databroom clean messy_data.csv \
-  --remove-empty-cols \
-  --standardize-column-names \
-  --normalize-values \
+  --clean-all \
   --output-file clean_data.csv \
   --output-code cleaning_script.py
 ```
@@ -150,10 +148,8 @@ df.to_csv("cleaned_survey.csv", index=False)
 **Databroom approach:**
 ```bash
 databroom clean survey_data.xlsx \
-  --remove-empty-cols --remove-empty-cols-threshold 0.8 \
-  --remove-empty-rows \
-  --standardize-column-names \
-  --normalize-values \
+  --clean-all \
+  --empty-threshold 0.8 \
   --output-file cleaned_survey.csv \
   --output-code survey_cleaning.py \
   --verbose
@@ -194,20 +190,20 @@ pip install databroom[gui]
 Clean your data files instantly with powerful CLI commands:
 
 ```bash
-# Basic column standardization
-databroom clean data.csv --standardize-column-names --output-file clean.csv
+# Smart clean everything (recommended)
+databroom clean data.csv --clean-all --output-file clean.csv
 
-# Remove empty data with custom threshold
-databroom clean messy.xlsx --remove-empty-cols --remove-empty-cols-threshold 0.8 --output-file cleaned.xlsx
+# Column cleaning with custom threshold
+databroom clean messy.xlsx --clean-columns --empty-threshold 0.8 --output-file cleaned.xlsx
 
 # Complete cleaning pipeline with code generation
-databroom clean survey.csv --remove-empty-cols --standardize-column-names --normalize-values --output-code cleaning_script.py --lang python
+databroom clean survey.csv --clean-all --output-code cleaning_script.py --lang python
 
 # Generate R/tidyverse code
-databroom clean data.csv --remove-empty-rows --normalize-column-names --output-code analysis.R --lang r
+databroom clean data.csv --clean-rows --output-code analysis.R --lang r
 
-# Multiple operations with verbose output
-databroom clean dataset.json --remove-empty-cols --standardize-column-names --normalize-values --verbose --info
+# Advanced options with verbose output
+databroom clean dataset.json --clean-all --no-snakecase --verbose --info
 
 # Launch interactive GUI
 databroom gui
@@ -241,10 +237,12 @@ from databroom.core.broom import Broom
 
 # Load and clean data with method chaining
 broom = Broom.from_csv('data.csv')
+result = broom.clean_all()  # Smart clean everything
+
+# Or use specific operations
 result = (broom
-    .remove_empty_cols(threshold=0.9)
-    .standardize_column_names()
-    .normalize_values())
+    .clean_columns(empty_threshold=0.9)
+    .clean_rows())
 
 # Get cleaned DataFrame
 cleaned_df = result.get_df()
@@ -295,28 +293,42 @@ generator.export_code('my_cleaning_pipeline.py')
 
 | Operation | CLI Flag | Purpose |
 |-----------|----------|---------|
-| **Remove Empty Columns** | `--remove-empty-cols` | Remove columns above missing value threshold |
-| **Remove Empty Rows** | `--remove-empty-rows` | Remove completely empty rows |
-| **Standardize Column Names** | `--standardize-column-names` | Convert to snake_case, remove special chars |
-| **Normalize Column Names** | `--normalize-column-names` | Remove accents and unicode characters |
-| **Normalize Values** | `--normalize-values` | Remove accents from text values |
-| **Standardize Values** | `--standardize-values` | Convert text to lowercase + underscores |
+| **🧹 Clean All** | `--clean-all` | **Smart clean everything: columns + rows with all operations** |
+| **📋 Clean Columns** | `--clean-columns` | Clean column names: snake_case + remove accents + remove empty |
+| **📊 Clean Rows** | `--clean-rows` | Clean row data: snake_case + remove accents + remove empty |
+| ~~Remove Empty Columns~~ | ~~`--remove-empty-cols`~~ | ~~Legacy: Use `--clean-columns` instead~~ |
+| ~~Remove Empty Rows~~ | ~~`--remove-empty-rows`~~ | ~~Legacy: Use `--clean-rows` instead~~ |
+| ~~Standardize Column Names~~ | ~~`--standardize-column-names`~~ | ~~Legacy: Use `--clean-columns` instead~~ |
+| ~~Normalize Column Names~~ | ~~`--normalize-column-names`~~ | ~~Legacy: Use `--clean-columns` instead~~ |
+| ~~Normalize Values~~ | ~~`--normalize-values`~~ | ~~Legacy: Use `--clean-rows` instead~~ |
+| ~~Standardize Values~~ | ~~`--standardize-values`~~ | ~~Legacy: Use `--clean-rows` instead~~ |
 
 ### CLI Parameters
 
 ```bash
-# Threshold parameters
---remove-empty-cols-threshold 0.8    # Custom missing value threshold (default: 0.9)
+# Smart Operations (recommended)
+--clean-all                          # Clean everything: columns + rows
+--clean-columns                      # Clean column names only
+--clean-rows                         # Clean row data only
+
+# Advanced Options (disable specific operations)
+--no-snakecase                       # Keep original text case in rows
+--no-snakecase-cols                  # Keep original column name case
+--no-remove-accents-vals             # Keep accents in text values
+--no-remove-empty-cols               # Keep empty columns
+
+# Parameters
+--empty-threshold 0.8                # Custom missing value threshold (default: 0.9)
 
 # Output options
---output-file cleaned.csv             # Save cleaned data
---output-code script.py               # Generate code file
---lang python                         # Code language (python/r)
+--output-file cleaned.csv            # Save cleaned data
+--output-code script.py              # Generate code file
+--lang python                        # Code language (python/r)
 
 # Behavior options
---verbose                             # Detailed output
---quiet                               # Minimal output  
---info                                # Show DataFrame info
+--verbose                            # Detailed output
+--quiet                              # Minimal output  
+--info                               # Show DataFrame info
 ```
 
 ---
@@ -327,9 +339,8 @@ generator.export_code('my_cleaning_pipeline.py')
 ```bash
 # Clean survey data and generate analysis script
 databroom clean survey_data.xlsx \
-  --remove-empty-cols --remove-empty-cols-threshold 0.7 \
-  --standardize-column-names \
-  --normalize-values \
+  --clean-all \
+  --empty-threshold 0.7 \
   --output-file clean_survey.csv \
   --output-code survey_analysis.py \
   --verbose
@@ -339,9 +350,7 @@ databroom clean survey_data.xlsx \
 ```bash
 # Generate R script for tidyverse users
 databroom clean research_data.csv \
-  --remove-empty-rows \
-  --standardize-column-names \
-  --normalize-column-names \
+  --clean-all \
   --output-code tidyverse_pipeline.R \
   --lang r
 ```
@@ -351,8 +360,7 @@ databroom clean research_data.csv \
 # Process multiple files with consistent operations
 for file in data/*.csv; do
   databroom clean "$file" \
-    --remove-empty-cols \
-    --standardize-column-names \
+    --clean-columns \
     --output-file "clean_$(basename "$file")" \
     --quiet
 done

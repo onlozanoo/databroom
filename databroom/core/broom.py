@@ -163,3 +163,33 @@ class Broom:
         self.pipeline.execute_operation('standardize_values')
 
         return self
+    
+    # New simplified cleaning methods
+    def clean_columns(self, remove_empty=True, empty_threshold=0.9, snake_case=True, remove_accents=True):
+        """Comprehensive column cleaning with all operations enabled by default."""
+        debug_log(f"Broom.clean_columns called with params: remove_empty={remove_empty}, empty_threshold={empty_threshold}, snake_case={snake_case}, remove_accents={remove_accents}", "BROOM")
+        self.pipeline.execute_operation('clean_columns', 
+                                       remove_empty=remove_empty,
+                                       empty_threshold=empty_threshold, 
+                                       snake_case=snake_case,
+                                       remove_accents=remove_accents)
+        debug_log("clean_columns operation completed", "BROOM")
+        return self
+    
+    def clean_rows(self, remove_empty=True, clean_text=True, remove_accents=True, snakecase=True):
+        """Comprehensive row cleaning with all operations enabled by default."""
+        debug_log(f"Broom.clean_rows called with params: remove_empty={remove_empty}, clean_text={clean_text}, remove_accents={remove_accents}, snakecase={snakecase}", "BROOM")
+        self.pipeline.execute_operation('clean_rows',
+                                       remove_empty=remove_empty,
+                                       clean_text=clean_text,
+                                       remove_accents=remove_accents,
+                                       snakecase=snakecase)
+        debug_log("clean_rows operation completed", "BROOM")
+        return self
+    
+    def clean_all(self):
+        """Ultimate cleaning function - applies both column and row cleaning with all defaults."""
+        debug_log("Broom.clean_all called", "BROOM")
+        self.pipeline.execute_operation('clean_all')
+        debug_log("clean_all operation completed", "BROOM")
+        return self

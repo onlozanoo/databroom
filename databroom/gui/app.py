@@ -12,17 +12,17 @@ from databroom.core.debug_logger import debug_log, get_current_log_file
 from databroom.generators.base import CodeGenerator
 
 def main():
-    debug_log("Starting Janitor Bot application", "GUI")
+    debug_log("Starting Databroom application", "GUI")
     
     st.set_page_config(
-        page_title="🧹 Janitor Bot",
+        page_title="🧹 Databroom",
         page_icon="🧹",
         layout="wide",
         initial_sidebar_state="expanded"
     )
     debug_log("Streamlit page config set", "GUI")
     
-    st.title("🧹 Janitor Bot")
+    st.title("🧹 Databroom")
     st.markdown("*DataFrame cleaning assistant with one-click code export*")
 
     # Style buttons to be full-width and rectangular
@@ -81,9 +81,9 @@ def main():
     
     # Initialize session state
     debug_log("Checking session state...", "GUI")
-    if 'janitor' not in st.session_state:
-        st.session_state.janitor = None
-        debug_log("Initialized janitor in session state", "GUI")
+    if 'broom' not in st.session_state:
+        st.session_state.broom = None
+        debug_log("Initialized Databroom in session state", "GUI")
     if 'original_df' not in st.session_state:
         st.session_state.original_df = None
         debug_log("Initialized original_df in session state", "GUI")
@@ -94,7 +94,7 @@ def main():
         st.session_state.uploaded_file_name = None
         debug_log("Initialized uploaded_file_name in session state", "GUI")
     
-    debug_log(f"Current session state - janitor: {st.session_state.janitor is not None}, history_length: {len(st.session_state.cleaning_history)}", "GUI")
+    debug_log(f"Current session state - Databroom: {st.session_state.broom is not None}, history_length: {len(st.session_state.cleaning_history)}", "GUI")
     
     # Sidebar for file upload and operations
     with st.sidebar:
@@ -109,27 +109,27 @@ def main():
         if uploaded_file is not None:
             debug_log(f"File uploaded - Name: {uploaded_file.name}, Type: {uploaded_file.type}, Size: {uploaded_file.size} bytes", "GUI")
             
-            # Only process if it's a new file or no janitor exists
+            # Only process if it's a new file or no broom exists
             if (st.session_state.uploaded_file_name != uploaded_file.name or 
-                st.session_state.janitor is None):
+                st.session_state.broom is None):
                 debug_log(f"Processing new file: {uploaded_file.name} (previous: {st.session_state.uploaded_file_name})", "GUI")
                 
                 try:
-                    debug_log("Creating Janitor instance from uploaded file...", "GUI")
-                    # Create Janitor instance
-                    janitor = Broom.from_file(uploaded_file)
-                    debug_log("Janitor instance created successfully", "GUI")
+                    debug_log("Creating broom instance from uploaded file...", "GUI")
+                    # Create broom instance
+                    broom = Broom.from_file(uploaded_file)
+                    debug_log("broom instance created successfully", "GUI")
                     
                     debug_log("Storing in session state...", "GUI")
-                    st.session_state.janitor = janitor
-                    st.session_state.original_df = janitor.get_df().copy()
+                    st.session_state.broom = broom
+                    st.session_state.original_df = broom.get_df().copy()
                     st.session_state.uploaded_file_name = uploaded_file.name
                     # Sync session state cleaning history with pipeline history
-                    st.session_state.cleaning_history = janitor.get_history().copy()
-                    debug_log(f"DataFrame stored - Shape: {janitor.get_df().shape}", "GUI")
+                    st.session_state.cleaning_history = broom.get_history().copy()
+                    debug_log(f"DataFrame stored - Shape: {broom.get_df().shape}", "GUI")
                     
                     st.success(f"✅ File loaded: {uploaded_file.name}")
-                    st.info(f"Shape: {janitor.get_df().shape[0]} rows × {janitor.get_df().shape[1]} columns")
+                    st.info(f"Shape: {broom.get_df().shape[0]} rows × {broom.get_df().shape[1]} columns")
                     
                 except Exception as e:
                     debug_log(f"Error loading file - {str(e)}", "GUI")
@@ -139,7 +139,7 @@ def main():
                 debug_log(f"File {uploaded_file.name} already processed, skipping re-creation", "GUI")
         
         # Show cleaning operations if file is loaded
-        if st.session_state.janitor is not None:
+        if st.session_state.broom is not None:
             st.header("🧹 Cleaning Operations")
             
             # Control buttons
@@ -147,15 +147,15 @@ def main():
             
             with col1:
                 # Step back button
-                can_step_back = st.session_state.janitor.can_step_back()
+                can_step_back = st.session_state.broom.can_step_back()
                 
                 if can_step_back:
                     st.caption("⚠️ This will undo your last cleaning operation")
                 
                 if st.button("↶ Step Back", help="Undo last operation", use_container_width=True, disabled=not can_step_back, type="secondary", key="step-back-btn"):
                     try:
-                        st.session_state.janitor.step_back()
-                        st.session_state.cleaning_history = st.session_state.janitor.get_history().copy()
+                        st.session_state.broom.step_back()
+                        st.session_state.cleaning_history = st.session_state.broom.get_history().copy()
                         st.success("↶ Stepped back to previous state")
                         st.rerun()
                     except ValueError as e:
@@ -166,177 +166,127 @@ def main():
                 st.caption("⚠️ This will reset all changes to original data")
                 
                 if st.button("🔄 Reset to Original", help="Reset DataFrame to original state", use_container_width=True, type="secondary", key="reset-btn"):
-                    st.session_state.janitor.reset()
+                    st.session_state.broom.reset()
                     st.session_state.cleaning_history = []
                     st.success("🔄 Reset to original state")
                     st.rerun()
             
             st.markdown("---")
-
-            # Cleaning operations grouped in dropdowns
-            with st.expander("Missing Data"):
-                # Threshold slider for empty columns (always visible)
-                threshold = st.slider(
-                    "Empty Cols Threshold",
-                    0.0,
-                    1.0,
-                    0.9,
-                    0.1,
-                    key="empty_cols_threshold",
-                    help="Columns with missing values above this ratio will be removed",
-                )
-
+            
+            # NEW SIMPLIFIED OPERATIONS
+            st.subheader("Smart Clean")
+            st.caption("One-click comprehensive cleaning operations")
+            
+            # Smart Clean buttons in columns
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
                 if st.button(
-                    "Remove Empty Cols",
-                    help="Remove columns with high missing values",
+                    "🧹 Clean All",
+                    help="Complete cleaning: columns + rows with all operations",
                     use_container_width=True,
+                    type="primary"
                 ):
-                    debug_log(f"Remove Empty Cols clicked - Threshold: {threshold}", "GUI")
-                    st.session_state.last_interaction = 'remove_empty_cols'
-                    debug_log(
-                        f"Before operation - Shape: {st.session_state.janitor.get_df().shape}",
-                        "GUI",
-                    )
-                    st.session_state.janitor.remove_empty_cols(threshold=threshold)
-                    debug_log(
-                        f"After operation - Shape: {st.session_state.janitor.get_df().shape}",
-                        "GUI",
-                    )
-                    # Sync with pipeline history instead of maintaining separate history
-                    st.session_state.cleaning_history = st.session_state.janitor.get_history().copy()
-                    st.session_state.cleaning_history.append(
-                        f"GUI: Removed empty columns (threshold: {threshold})"
-                    )
-                    debug_log(
-                        f"Synced history - Total operations: {len(st.session_state.cleaning_history)}",
-                        "GUI",
-                    )
+                    debug_log("Clean All clicked", "GUI")
+                    st.session_state.last_interaction = 'clean_all'
+                    debug_log(f"Before operation - Shape: {st.session_state.broom.get_df().shape}", "GUI")
+                    st.session_state.broom.clean_all()
+                    debug_log(f"After operation - Shape: {st.session_state.broom.get_df().shape}", "GUI")
+                    st.session_state.cleaning_history = st.session_state.broom.get_history().copy()
+                    st.session_state.cleaning_history.append("GUI: Applied complete cleaning (clean_all)")
+                    debug_log(f"Synced history - Total operations: {len(st.session_state.cleaning_history)}", "GUI")
+                    st.success("🧹 Complete cleaning applied!")
                     st.rerun()
-
+            
+            with col2:
                 if st.button(
-                    "Remove Empty Rows",
-                    help="Remove completely empty rows",
-                    use_container_width=True,
+                    "📝 Clean Columns",
+                    help="Clean column names: snake_case + remove accents + remove empty",
+                    use_container_width=True
                 ):
-                    debug_log("Remove Empty Rows clicked", "GUI")
-                    st.session_state.last_interaction = 'remove_empty_rows'
-                    debug_log(
-                        f"Before operation - Shape: {st.session_state.janitor.get_df().shape}",
-                        "GUI",
+                    debug_log("Clean Columns clicked", "GUI")
+                    st.session_state.last_interaction = 'clean_columns'
+                    
+                    # Advanced options from sidebar
+                    empty_threshold = st.session_state.get('clean_cols_threshold', 0.9)
+                    no_snake_case = st.session_state.get('no_snake_case_cols', False)
+                    no_remove_accents = st.session_state.get('no_remove_accents_cols', False)
+                    no_remove_empty = st.session_state.get('no_remove_empty_cols', False)
+                    
+                    debug_log(f"Before operation - Columns: {list(st.session_state.broom.get_df().columns)}", "GUI")
+                    st.session_state.broom.clean_columns(
+                        remove_empty=not no_remove_empty,
+                        empty_threshold=empty_threshold,
+                        snake_case=not no_snake_case,
+                        remove_accents=not no_remove_accents
                     )
-                    st.session_state.janitor.remove_empty_rows()
-                    debug_log(
-                        f"After operation - Shape: {st.session_state.janitor.get_df().shape}",
-                        "GUI",
-                    )
-                    st.session_state.cleaning_history = st.session_state.janitor.get_history().copy()
-                    st.session_state.cleaning_history.append("GUI: Removed empty rows")
-                    debug_log(
-                        f"Synced history - Total operations: {len(st.session_state.cleaning_history)}",
-                        "GUI",
-                    )
+                    debug_log(f"After operation - Columns: {list(st.session_state.broom.get_df().columns)}", "GUI")
+                    st.session_state.cleaning_history = st.session_state.broom.get_history().copy()
+                    st.session_state.cleaning_history.append("GUI: Cleaned column names (clean_columns)")
+                    debug_log(f"Synced history - Total operations: {len(st.session_state.cleaning_history)}", "GUI")
+                    st.success("📝 Column names cleaned!")
                     st.rerun()
-
-            with st.expander("Column Names"):
+            
+            with col3:
                 if st.button(
-                    "Standardize Names",
-                    help="Convert column names to lowercase with underscores",
-                    use_container_width=True,
+                    "📄 Clean Rows",
+                    help="Clean row data: snake_case + remove accents + remove empty",
+                    use_container_width=True
                 ):
-                    debug_log("Standardize Names clicked", "GUI")
-                    st.session_state.last_interaction = 'standardize_names'
-                    debug_log(
-                        f"Before operation - Columns: {list(st.session_state.janitor.get_df().columns)}",
-                        "GUI",
+                    debug_log("Clean Rows clicked", "GUI")
+                    st.session_state.last_interaction = 'clean_rows'
+                    
+                    # Advanced options from sidebar
+                    no_snakecase = st.session_state.get('no_snakecase_vals', False)
+                    no_remove_accents = st.session_state.get('no_remove_accents_vals', False)
+                    no_clean_text = st.session_state.get('no_clean_text', False)
+                    no_remove_empty = st.session_state.get('no_remove_empty_rows', False)
+                    
+                    debug_log(f"Before operation - Sample values: {st.session_state.broom.get_df().iloc[0].to_dict() if len(st.session_state.broom.get_df()) > 0 else 'No data'}", "GUI")
+                    st.session_state.broom.clean_rows(
+                        remove_empty=not no_remove_empty,
+                        clean_text=not no_clean_text,
+                        remove_accents=not no_remove_accents,
+                        snakecase=not no_snakecase
                     )
-                    st.session_state.janitor.standardize_column_names()
-                    debug_log(
-                        f"After operation - Columns: {list(st.session_state.janitor.get_df().columns)}",
-                        "GUI",
-                    )
-                    st.session_state.cleaning_history = st.session_state.janitor.get_history().copy()
-                    st.session_state.cleaning_history.append("GUI: Standardized column names")
-                    debug_log(
-                        f"Synced history - Total operations: {len(st.session_state.cleaning_history)}",
-                        "GUI",
-                    )
+                    debug_log(f"After operation - Sample values: {st.session_state.broom.get_df().iloc[0].to_dict() if len(st.session_state.broom.get_df()) > 0 else 'No data'}", "GUI")
+                    st.session_state.cleaning_history = st.session_state.broom.get_history().copy()
+                    st.session_state.cleaning_history.append("GUI: Cleaned row data (clean_rows)")
+                    debug_log(f"Synced history - Total operations: {len(st.session_state.cleaning_history)}", "GUI")
+                    st.success("📄 Row data cleaned!")
                     st.rerun()
-
-                if st.button(
-                    "Normalize Names",
-                    help="Remove accents from column names",
-                    use_container_width=True,
-                ):
-                    debug_log("Normalize Names clicked", "GUI")
-                    st.session_state.last_interaction = 'normalize_names'
-                    debug_log(
-                        f"Before operation - Columns: {list(st.session_state.janitor.get_df().columns)}",
-                        "GUI",
+            
+            # Advanced options in sidebar
+            with st.sidebar:
+                if st.session_state.get('show_advanced_options', False):
+                    st.markdown("---")
+                    st.subheader("Advanced Options")
+                    
+                    # Column cleaning options
+                    st.markdown("**Column Options:**")
+                    st.session_state['clean_cols_threshold'] = st.slider(
+                        "Empty threshold", 0.0, 1.0, 0.9, 0.1,
+                        help="Columns with more missing values will be removed"
                     )
-                    st.session_state.janitor.normalize_column_names()
-                    debug_log(
-                        f"After operation - Columns: {list(st.session_state.janitor.get_df().columns)}",
-                        "GUI",
-                    )
-                    st.session_state.cleaning_history = st.session_state.janitor.get_history().copy()
-                    st.session_state.cleaning_history.append("GUI: Normalized column names")
-                    debug_log(
-                        f"Synced history - Total operations: {len(st.session_state.cleaning_history)}",
-                        "GUI",
-                    )
-                    st.rerun()
-
-            with st.expander("Values"):
-                if st.button(
-                    "Normalize Values",
-                    help="Remove accents from all text values",
-                    use_container_width=True,
-                ):
-                    debug_log("Normalize Values clicked", "GUI")
-                    st.session_state.last_interaction = 'normalize_values'
-                    debug_log(
-                        f"Before operation - Sample values: {st.session_state.janitor.get_df().iloc[0].to_dict() if len(st.session_state.janitor.get_df()) > 0 else 'No data'}",
-                        "GUI",
-                    )
-                    st.session_state.janitor.normalize_values()
-                    debug_log(
-                        f"After operation - Sample values: {st.session_state.janitor.get_df().iloc[0].to_dict() if len(st.session_state.janitor.get_df()) > 0 else 'No data'}",
-                        "GUI",
-                    )
-                    st.session_state.cleaning_history = st.session_state.janitor.get_history().copy()
-                    st.session_state.cleaning_history.append("GUI: Normalized values")
-                    debug_log(
-                        f"Synced history - Total operations: {len(st.session_state.cleaning_history)}",
-                        "GUI",
-                    )
-                    st.rerun()
-
-                if st.button(
-                    "Standardize Values",
-                    help="Lowercase + underscore replacement for values",
-                    use_container_width=True,
-                ):
-                    debug_log("Standardize Values clicked", "GUI")
-                    st.session_state.last_interaction = 'standardize_values'
-                    debug_log(
-                        f"Before operation - Sample values: {st.session_state.janitor.get_df().iloc[0].to_dict() if len(st.session_state.janitor.get_df()) > 0 else 'No data'}",
-                        "GUI",
-                    )
-                    st.session_state.janitor.standardize_values()
-                    debug_log(
-                        f"After operation - Sample values: {st.session_state.janitor.get_df().iloc[0].to_dict() if len(st.session_state.janitor.get_df()) > 0 else 'No data'}",
-                        "GUI",
-                    )
-                    st.session_state.cleaning_history = st.session_state.janitor.get_history().copy()
-                    st.session_state.cleaning_history.append("GUI: Standardized values")
-                    debug_log(
-                        f"Synced history - Total operations: {len(st.session_state.cleaning_history)}",
-                        "GUI",
-                    )
-                    st.rerun()
+                    st.session_state['no_snake_case_cols'] = st.checkbox("Keep original column case", help="Don't convert to snake_case")
+                    st.session_state['no_remove_accents_cols'] = st.checkbox("Keep accents in columns", help="Don't remove accents from column names")
+                    st.session_state['no_remove_empty_cols'] = st.checkbox("Keep empty columns", help="Don't remove empty columns")
+                    
+                    # Row cleaning options
+                    st.markdown("**Row Options:**")
+                    st.session_state['no_snakecase_vals'] = st.checkbox("Keep original text case", help="Don't convert values to snake_case")
+                    st.session_state['no_remove_accents_vals'] = st.checkbox("Keep accents in values", help="Don't remove accents from text values")
+                    st.session_state['no_clean_text'] = st.checkbox("Skip text cleaning", help="Don't clean text values at all")
+                    st.session_state['no_remove_empty_rows'] = st.checkbox("Keep empty rows", help="Don't remove empty rows")
+            
+            # Toggle for advanced options
+            if st.button("⚙️ Toggle Advanced Options", help="Show/hide advanced cleaning options", use_container_width=True):
+                st.session_state['show_advanced_options'] = not st.session_state.get('show_advanced_options', False)
+                st.rerun()
+            
     
     # Main content area
-    if st.session_state.janitor is not None:
+    if st.session_state.broom is not None:
         # Tabs for different views
         tab1, tab2, tab3, tab4 = st.tabs(["📊 Current Data", "📝 History", "🔍 Data Info", "💾 Export Code"])
         
@@ -346,7 +296,7 @@ def main():
         
         with tab1:
             st.subheader("Current DataFrame")
-            current_df = st.session_state.janitor.get_df()
+            current_df = st.session_state.broom.get_df()
             
             # Show basic stats
             col1, col2, col3, col4 = st.columns(4)
@@ -378,9 +328,9 @@ def main():
                 for i, operation in enumerate(st.session_state.cleaning_history, 1):
                     st.write(f"{i}. {operation}")
                 
-                # Show technical history from Janitor
+                # Show technical history from broom
                 with st.expander("Technical Details"):
-                    history = st.session_state.janitor.get_history()
+                    history = st.session_state.broom.get_history()
                     for entry in history:
                         st.code(entry, language="text")
             else:
@@ -388,7 +338,7 @@ def main():
         
         with tab3:
             st.subheader("Data Information")
-            current_df = st.session_state.janitor.get_df()
+            current_df = st.session_state.broom.get_df()
             
             # Data types
             st.write("**Data Types:**")
@@ -438,7 +388,7 @@ def main():
                         download_label = "📥 Download R Script"
                     
                     # Generate code
-                    history = st.session_state.janitor.get_history()
+                    history = st.session_state.broom.get_history()
                     generator.load_history(history)
                     code = generator.generate_code()
                     
@@ -475,7 +425,7 @@ def main():
                     st.download_button(
                         label=download_label,
                         data=full_script,
-                        file_name=f"janitor_cleaning_pipeline{file_extension}",
+                        file_name=f"broom_cleaning_pipeline{file_extension}",
                         mime="text/plain"
                     )
                     
@@ -493,7 +443,7 @@ def main():
     else:
         # Welcome screen
         st.markdown("""
-        ## Welcome to Janitor Bot! 🧹
+        ## Welcome to Databroom! 🧹
         
         Upload a data file using the sidebar to get started with cleaning your DataFrame.
         

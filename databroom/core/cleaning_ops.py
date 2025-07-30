@@ -2,6 +2,7 @@
 
 import pandas as pd
 import unicodedata
+import re
 
 def remove_empty_cols(df: pd.DataFrame, threshold: float = 0.9) -> pd.DataFrame:
     """Remove empty columns from a DataFrame based on a threshold of non-null values."""
@@ -32,103 +33,99 @@ def remove_empty_rows(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def standardize_column_names(df: pd.DataFrame) -> pd.DataFrame:
-    """Standardize column names by converting to lowercase and replacing spaces with underscores."""
-    
-    if not isinstance(df, pd.DataFrame):
-        raise ValueError("Input must be a pandas DataFrame")
-    
-    # Standardize column names
-    df.columns = df.columns.str.lower().str.replace(' ', '_')
-    
-    return df
+    """Legacy function - Use clean_columns() instead."""
+    return clean_columns(df, remove_empty=False, snake_case=True, remove_accents=False)
 
 def normalize_column_names(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Normalize column names by removing accents and special characters.
-    
-    This function processes all column names in the DataFrame and converts characters like
-    'é' → 'e', 'ñ' → 'n', and so on. It is useful for standardizing column names before analysis.
-    
-    Args:
-        df (pd.DataFrame): The DataFrame to process.
-    
-    Returns:
-        pd.DataFrame: A new DataFrame with normalized column names.
-    """
-    
-    if not isinstance(df, pd.DataFrame):
-        raise ValueError("Input must be a pandas DataFrame")
-    
-    def remove_accents(val):
-        if isinstance(val, str):
-            normalized = unicodedata.normalize('NFKD', val)
-            return normalized.encode('ASCII', 'ignore').decode('utf-8')
-        return val
-    
-    # Apply normalization to all column names
-    df.columns = df.columns.map(remove_accents)
-    
-    return df
+    """Legacy function - Use clean_columns() instead."""
+    return clean_columns(df, remove_empty=False, snake_case=False, remove_accents=True)
 
 def normalize_values(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Normalize text values in a DataFrame by removing accents and special characters.
+    """Legacy function - Use clean_rows() instead."""
+    return clean_rows(df, remove_empty=False, clean_text=True, remove_accents=True, snakecase=False)
 
-    This function processes all string entries in the DataFrame and converts characters like
-    'é' → 'e', 'ñ' → 'n', and so on. It is useful for standardizing textual data before analysis.
-
-    Args:
-        df (pd.DataFrame): The DataFrame to process.
-
-    Returns:
-        pd.DataFrame: A new DataFrame with normalized text.
-    """
+def clean_columns(df: pd.DataFrame, 
+                 remove_empty: bool = True,
+                 empty_threshold: float = 0.9, 
+                 snake_case: bool = True,
+                 remove_accents: bool = True) -> pd.DataFrame:
+    """Comprehensive column cleaning with all operations enabled by default."""
     
     if not isinstance(df, pd.DataFrame):
         raise ValueError("Input must be a pandas DataFrame")
     
-    def remove_accents(val):
-        if isinstance(val, str):
-            normalized = unicodedata.normalize('NFKD', val)
-            return normalized.encode('ASCII', 'ignore').decode('utf-8')
-        return val
-
-    # Apply normalization to all string cells
-    cleaned_df = df.applymap(remove_accents)
+    result_df = df.copy()
     
-    return cleaned_df
+    # Remove empty columns first
+    if remove_empty:
+        result_df = remove_empty_cols(result_df, threshold=empty_threshold)
+    
+    # Remove accents from column names
+    if remove_accents:
+        def remove_accents_func(val):
+            if isinstance(val, str):
+                normalized = unicodedata.normalize('NFKD', val)
+                return normalized.encode('ASCII', 'ignore').decode('utf-8')
+            return val
+        result_df.columns = result_df.columns.map(remove_accents_func)
+    
+    # Convert to snake_case
+    if snake_case:
+        result_df.columns = result_df.columns.str.lower().str.replace(' ', '_').str.replace(r'[^a-z0-9_]', '', regex=True)
+    
+    return result_df
 
+
+def clean_rows(df: pd.DataFrame,
+              remove_empty: bool = True, 
+              clean_text: bool = True,
+              remove_accents: bool = True,
+              snakecase: bool = True) -> pd.DataFrame:
+    """Comprehensive row cleaning with all operations enabled by default."""
+    
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError("Input must be a pandas DataFrame")
+    
+    result_df = df.copy()
+    
+    # Remove completely empty rows
+    if remove_empty:
+        result_df = remove_empty_rows(result_df)
+    
+    # Apply text cleaning if enabled
+    if clean_text:
+        def clean_text_value(val):
+            if not isinstance(val, str):
+                return val
+            
+            # Remove accents
+            if remove_accents:
+                normalized = unicodedata.normalize('NFKD', val)
+                val = normalized.encode('ASCII', 'ignore').decode('utf-8')
+            
+            # Apply snake_case transformation (lowercase + standardize spaces)
+            if snakecase:
+                val = val.lower()
+                val = re.sub(r'\s+', '_', val.strip())  # Multiple spaces -> single underscore
+            
+            return val
+        
+        # Apply to all string columns
+        result_df = result_df.map(clean_text_value)
+    
+    return result_df
+
+
+def clean_all(df: pd.DataFrame) -> pd.DataFrame:
+    """Ultimate cleaning function - applies both column and row cleaning with all defaults."""
+    
+    result_df = clean_columns(df)
+    result_df = clean_rows(result_df)
+    
+    return result_df
+
+
+# Legacy functions for backward compatibility
 def standardize_values(df: pd.DataFrame, columns: list = None) -> pd.DataFrame:
-    """
-    Standardize text values in a DataFrame by converting to lowercase and replacing spaces with underscores.
-
-    This function processes string entries in the DataFrame and converts them to lowercase,
-    replacing spaces with underscores. It is useful for standardizing textual data before analysis.
-
-    Args:
-        df (pd.DataFrame): The DataFrame to process.
-        columns (list, optional): Specific columns to standardize. If None, applies to all columns.
-
-    Returns:
-        pd.DataFrame: A new DataFrame with standardized text.
-    """
-    
-    if not isinstance(df, pd.DataFrame):
-        raise ValueError("Input must be a pandas DataFrame")
-    
-    # Start with normalized values (removes accents)
-    cleaned_df = normalize_values(df)
-    
-    def standardize_text(x):
-        return x.lower().replace(' ', '_') if isinstance(x, str) else x
-    
-    if columns is None:
-        # Apply to all columns
-        return cleaned_df.applymap(standardize_text)
-    else:
-        # Apply only to specified columns
-        result_df = cleaned_df.copy()
-        for col in columns:
-            if col in result_df.columns:
-                result_df[col] = result_df[col].apply(standardize_text)
-        return result_df
+    """Legacy function - Use clean_rows() instead."""
+    return clean_rows(df, clean_text=True, remove_accents=True, snakecase=True)

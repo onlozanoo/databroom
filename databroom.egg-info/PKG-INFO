@@ -33,32 +33,193 @@ Requires-Dist: streamlit>=1.28.0
 Requires-Dist: unidecode>=1.3.0
 Requires-Dist: jinja2>=3.0.0
 Requires-Dist: pathlib2>=2.3.0
-Provides-Extra: dev
-Requires-Dist: pytest>=7.0.0; extra == "dev"
-Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
-Requires-Dist: black>=22.0.0; extra == "dev"
-Requires-Dist: isort>=5.10.0; extra == "dev"
-Requires-Dist: flake8>=5.0.0; extra == "dev"
-Requires-Dist: mypy>=0.991; extra == "dev"
-Requires-Dist: pre-commit>=2.20.0; extra == "dev"
+Requires-Dist: typer>=0.7.0
+Requires-Dist: rich>=12.0.0
 Provides-Extra: cli
+Requires-Dist: pandas>=1.3.0; extra == "cli"
+Requires-Dist: numpy>=1.20.0; extra == "cli"
+Requires-Dist: unidecode>=1.3.0; extra == "cli"
+Requires-Dist: jinja2>=3.0.0; extra == "cli"
+Requires-Dist: pathlib2>=2.3.0; extra == "cli"
 Requires-Dist: typer>=0.7.0; extra == "cli"
 Requires-Dist: rich>=12.0.0; extra == "cli"
-Provides-Extra: reports
-Requires-Dist: jinja2>=3.0.0; extra == "reports"
-Requires-Dist: plotly>=5.0.0; extra == "reports"
-Requires-Dist: kaleido>=0.2.1; extra == "reports"
-Provides-Extra: all
-Requires-Dist: databroom[cli,dev,reports]; extra == "all"
+Provides-Extra: gui
+Requires-Dist: pandas>=1.3.0; extra == "gui"
+Requires-Dist: numpy>=1.20.0; extra == "gui"
+Requires-Dist: streamlit>=1.28.0; extra == "gui"
+Requires-Dist: unidecode>=1.3.0; extra == "gui"
+Requires-Dist: jinja2>=3.0.0; extra == "gui"
+Requires-Dist: pathlib2>=2.3.0; extra == "gui"
 Dynamic: license-file
 
 # 🧹 Databroom
 
-*A powerful DataFrame cleaning tool with **Command Line Interface**, **Interactive GUI**, and **Programmatic API** - automatically generates reproducible **Python/pandas** and **R/tidyverse** code.*
+*A powerful DataFrame cleaning tool with **Command Line Interface**, **Interactive GUI**, and **Programmatic API** - automatically generates reproducible **Python/pandas**, **R/tidyverse** code, and **CLI** Commands*
 
-[![PyPI version](https://badge.fury.io/py/janitor-bot.svg)](https://pypi.org/project/janitor-bot/)
+[![PyPI version](https://badge.fury.io/py/databroom.svg)](https://pypi.org/project/databroom/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+## 📑 Table of Contents
+
+- [🧹 Databroom](#-databroom)
+  - [📑 Table of Contents](#-table-of-contents)
+  - [🆚 Why Databroom?](#-why-databroom)
+    - [**The Problem: Manual Data Cleaning is Tedious**](#the-problem-manual-data-cleaning-is-tedious)
+    - [**The Benefits**](#the-benefits)
+    - [**Real-world Comparison**](#real-world-comparison)
+    - [**When to Use Databroom**](#when-to-use-databroom)
+  - [🚀 Quick Start](#-quick-start)
+    - [Installation](#installation)
+    - [Command Line Interface (Primary Interface)](#command-line-interface-primary-interface)
+    - [Interactive GUI](#interactive-gui)
+    - [GUI Screenshots](#gui-screenshots)
+    - [Programmatic API](#programmatic-api)
+  - [✨ Features](#-features)
+    - [**🖥️ Command Line Interface**](#️-command-line-interface)
+    - [**🎨 Interactive GUI**](#-interactive-gui)
+    - [**⚙️ Programmatic API**](#️-programmatic-api)
+    - [**🔄 Code Generation**](#-code-generation)
+  - [🧰 Available Cleaning Operations](#-available-cleaning-operations)
+    - [CLI Parameters](#cli-parameters)
+  - [📊 Example Workflows](#-example-workflows)
+    - [**Data Science Pipeline**](#data-science-pipeline)
+    - [**R/Tidyverse Workflow**](#rtidyverse-workflow)
+    - [**Batch Processing Setup**](#batch-processing-setup)
+  - [🏗️ Architecture](#️-architecture)
+  - [🛠️ Development](#️-development)
+    - [Local Development](#local-development)
+    - [Testing](#testing)
+    - [Code Quality](#code-quality)
+  - [📈 Project Status](#-project-status)
+  - [🤝 Contributing](#-contributing)
+    - [**Ways to Contribute**](#ways-to-contribute)
+  - [📄 License](#-license)
+
+---
+
+## 🆚 Why Databroom? 
+
+### **The Problem: Manual Data Cleaning is Tedious**
+
+**With pandas (manual approach):**
+```python
+import pandas as pd
+import unicodedata
+
+# Read the file
+df = pd.read_csv("messy_data.csv")
+
+# Remove columns with more than 90% missing values
+threshold = 0.9
+df = df.loc[:, df.isnull().mean() < threshold]
+
+# Standardize column names manually
+df.columns = df.columns.str.lower().str.replace(' ', '_')
+
+# Normalize text values (removing accents)
+def normalize_text(text):
+    if not isinstance(text, str):
+        return text
+    return ''.join(
+        c for c in unicodedata.normalize('NFKD', text)
+        if not unicodedata.combining(c)
+    )
+
+# Apply to all string columns (need to identify them first)
+string_cols = df.select_dtypes(include=['object']).columns
+for col in string_cols:
+    df[col] = df[col].apply(normalize_text)
+
+# Save the result
+df.to_csv("clean_data.csv", index=False)
+```
+
+**With Databroom (one command):**
+```bash
+databroom clean messy_data.csv \
+  --remove-empty-cols \
+  --standardize-column-names \
+  --normalize-values \
+  --output-file clean_data.csv \
+  --output-code cleaning_script.py
+```
+
+### **The Benefits**
+
+| Feature | Manual Pandas | Databroom |
+|---------|---------------|-----------|
+| **Lines of code** | ~20+ lines | 1 command |
+| **Time to implement** | 10-15 minutes | 10 seconds |
+| **Error prone** | High (manual logic) | Low (tested operations) |
+| **Reproducible** | Need to save script | Auto-generates code |
+| **Cross-language** | Python only | Python + R output |
+| **GUI option** | No | Yes (`databroom gui`) |
+| **Parameter tuning** | Manual coding | CLI flags & GUI sliders |
+
+### **Real-world Comparison**
+
+**Complex cleaning task:**
+```python
+# Pandas approach: ~50 lines of code
+import pandas as pd
+import unicodedata
+import numpy as np
+
+df = pd.read_excel("survey_data.xlsx")
+
+# Remove empty columns
+empty_threshold = 0.8
+df = df.dropna(axis=1, thresh=int(empty_threshold * len(df)))
+
+# Remove empty rows  
+df = df.dropna(how='all')
+
+# Fix column names
+df.columns = df.columns.str.lower()
+df.columns = df.columns.str.replace(' ', '_')
+df.columns = df.columns.str.replace('[^a-z0-9_]', '', regex=True)
+
+# Normalize text in all string columns
+def clean_text(text):
+    if pd.isna(text) or not isinstance(text, str):
+        return text
+    # Remove accents
+    text = unicodedata.normalize('NFKD', text)
+    text = ''.join(c for c in text if not unicodedata.combining(c))
+    return text
+
+string_columns = df.select_dtypes(include=['object']).columns
+for col in string_columns:
+    df[col] = df[col].apply(clean_text)
+
+df.to_csv("cleaned_survey.csv", index=False)
+```
+
+**Databroom approach:**
+```bash
+databroom clean survey_data.xlsx \
+  --remove-empty-cols --remove-empty-cols-threshold 0.8 \
+  --remove-empty-rows \
+  --standardize-column-names \
+  --normalize-values \
+  --output-file cleaned_survey.csv \
+  --output-code survey_cleaning.py \
+  --verbose
+```
+
+**Result:** Same output, 1 command, includes reproducible script generation.
+
+### **When to Use Databroom**
+
+✅ **Perfect for:**
+- **🤖 Full automation** - Transform your entire data cleaning pipeline into a single command
+- Quick data exploration and cleaning
+- Batch processing multiple files
+- Learning data cleaning best practices
+- Generating reproducible cleaning scripts
+- Teams needing consistent data preprocessing
+- Converting workflows between Python and R
 
 ---
 
@@ -67,8 +228,14 @@ Dynamic: license-file
 ### Installation
 
 ```bash
-# Install from PyPI (recommended)
+# Complete installation - CLI + GUI + API (recommended)
 pip install databroom
+
+# CLI + API only (no Streamlit GUI)
+pip install databroom[cli]
+
+# GUI + API only (no CLI interface)  
+pip install databroom[gui]
 ```
 
 ### Command Line Interface (Primary Interface)
@@ -119,7 +286,7 @@ databroom gui
 Use Databroom directly in your Python scripts:
 
 ```python
-from databroom.core.janitor import Broom
+from databroom.core.broom import Broom
 
 # Load and clean data with method chaining
 broom = Broom.from_csv('data.csv')
@@ -331,7 +498,7 @@ mypy databroom/
 - Interactive Streamlit GUI with live preview
 - Programmatic API with method chaining
 - Python and R code generation
-- Comprehensive test suite (83 tests, 69 passing)
+- Comprehensive test suite
 - PyPI package distribution ready
 - - Dinamic new operations load
 

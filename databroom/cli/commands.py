@@ -37,33 +37,70 @@ def clean_command(
     show_info: Annotated[bool, typer.Option("--info", 
                                            help=r"[bold yellow]\[BEHAVIOR][/bold yellow] Show DataFrame information before and after processing")] = False,
     
-    # Data Cleaning Operations
-    remove_empty_cols: Annotated[bool, typer.Option("--remove-empty-cols", 
-                                                   help=r"[bold green]\[CLEANING][/bold green] Remove empty columns from DataFrame")] = False,
-    remove_empty_rows: Annotated[bool, typer.Option("--remove-empty-rows", 
-                                                   help=r"[bold green]\[CLEANING][/bold green] Remove empty rows from DataFrame")] = False,
-    standardize_column_names: Annotated[bool, typer.Option("--standardize-column-names", 
-                                                          help=r"[bold green]\[CLEANING][/bold green] Standardize column names")] = False,
-    normalize_column_names: Annotated[bool, typer.Option("--normalize-column-names", 
-                                                        help=r"[bold green]\[CLEANING][/bold green] Normalize column names")] = False,
-    normalize_values: Annotated[bool, typer.Option("--normalize-values", 
-                                                  help=r"[bold green]\[CLEANING][/bold green] Normalize values in DataFrame")] = False,
-    standardize_values: Annotated[bool, typer.Option("--standardize-values", 
-                                                    help=r"[bold green]\[CLEANING][/bold green] Standardize values in DataFrame")] = False,
+    # NEW SIMPLIFIED CLEANING OPERATIONS
+    clean_all: Annotated[bool, typer.Option("--clean-all", 
+                                           help=r"[bold green]\[SMART CLEAN][/bold green] Clean everything: columns + rows with all operations enabled")] = False,
+    clean_columns: Annotated[bool, typer.Option("--clean-columns", 
+                                               help=r"[bold green]\[SMART CLEAN][/bold green] Clean column names: snake_case + remove accents + remove empty")] = False,
+    clean_rows: Annotated[bool, typer.Option("--clean-rows", 
+                                            help=r"[bold green]\[SMART CLEAN][/bold green] Clean row data: snake_case + remove accents + remove empty")] = False,
     
-    # Operation Parameters
+    # ADVANCED COLUMN OPTIONS
+    no_snakecase_cols: Annotated[bool, typer.Option("--no-snakecase-cols", 
+                                                    help=r"[bold red]\[ADVANCED][/bold red] Disable snake_case conversion for column names")] = False,
+    no_remove_accents_cols: Annotated[bool, typer.Option("--no-remove-accents-cols", 
+                                                        help=r"[bold red]\[ADVANCED][/bold red] Keep accents in column names")] = False,
+    no_remove_empty_cols: Annotated[bool, typer.Option("--no-remove-empty-cols", 
+                                                      help=r"[bold red]\[ADVANCED][/bold red] Keep empty columns")] = False,
+    
+    # ADVANCED ROW OPTIONS  
+    no_clean_text: Annotated[bool, typer.Option("--no-clean-text", 
+                                               help=r"[bold red]\[ADVANCED][/bold red] Disable text cleaning in row values")] = False,
+    no_remove_accents_vals: Annotated[bool, typer.Option("--no-remove-accents-vals", 
+                                                        help=r"[bold red]\[ADVANCED][/bold red] Keep accents in text values")] = False,
+    no_snakecase: Annotated[bool, typer.Option("--no-snakecase", 
+                                              help=r"[bold red]\[ADVANCED][/bold red] Keep original text case and spaces (no snake_case)")] = False,
+    no_remove_empty_rows: Annotated[bool, typer.Option("--no-remove-empty-rows", 
+                                                      help=r"[bold red]\[ADVANCED][/bold red] Keep empty rows")] = False,
+    
+    # LEGACY OPERATIONS (for backward compatibility)
+    remove_empty_cols: Annotated[bool, typer.Option("--remove-empty-cols", 
+                                                   help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Remove empty columns (use --clean-columns instead)")] = False,
+    remove_empty_rows: Annotated[bool, typer.Option("--remove-empty-rows", 
+                                                   help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Remove empty rows (use --clean-rows instead)")] = False,
+    standardize_column_names: Annotated[bool, typer.Option("--standardize-column-names", 
+                                                          help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: snake_case columns (use --clean-columns instead)")] = False,
+    normalize_column_names: Annotated[bool, typer.Option("--normalize-column-names", 
+                                                        help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Remove accents from columns (use --clean-columns instead)")] = False,
+    normalize_values: Annotated[bool, typer.Option("--normalize-values", 
+                                                  help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Remove accents from values (use --clean-rows instead)")] = False,
+    standardize_values: Annotated[bool, typer.Option("--standardize-values", 
+                                                    help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Clean text values (use --clean-rows instead)")] = False,
+    
+    # PARAMETERS
+    empty_threshold: Annotated[float, typer.Option("--empty-threshold", 
+                                                  help=r"[bold blue]\[PARAMS][/bold blue] Threshold for removing empty columns (0.9 = 90% missing) [dim]default: 0.9[/dim]")] = 0.9,
     remove_empty_cols_threshold: Annotated[float, typer.Option("--remove-empty-cols-threshold", 
-                                                              help=r"[bold red]\[PARAMS][/bold red] Threshold for remove_empty_cols ([dim]default: 0.9[/dim])")] = 0.9
+                                                              help=r"[bold yellow]\[LEGACY PARAMS][/bold yellow] Legacy parameter (use --empty-threshold instead)")] = 0.9
 ):
     """
-    [bold]Clean DataFrame with specified operations and generate executable code.[/bold]
+    [bold]Clean DataFrame with smart operations and generate executable code.[/bold]
     
-    Apply data cleaning operations to your input file and optionally generate 
-    executable Python or R code that reproduces the cleaning pipeline.
+    [green]QUICK START:[/green]
+    • [blue]--clean-all[/blue]     → Does everything (recommended for most cases)
+    • [blue]--clean-columns[/blue] → Only clean column names (snake_case + remove accents + remove empty)  
+    • [blue]--clean-rows[/blue]    → Only clean row data (snake_case + remove accents + remove empty)
     
-    Use [blue]--output-file[/blue] to save the cleaned DataFrame and [blue]--output-code[/blue] 
-    to generate a script. Combine multiple cleaning operations for comprehensive 
-    data preprocessing.
+    [green]ADVANCED:[/green] Use --no-* flags to disable specific operations:
+    • [red]--no-snakecase[/red]         → Keep original text case and spaces (rows)
+    • [red]--no-snakecase-cols[/red]    → Keep original column name case and spaces  
+    • [red]--no-remove-accents-vals[/red] → Keep accents in text values
+    • [red]--no-remove-empty-cols[/red]   → Keep empty columns
+    
+    [green]OUTPUT:[/green] Use [blue]--output-file[/blue] to save cleaned data and [blue]--output-code[/blue] 
+    to generate Python/R scripts that reproduce the cleaning pipeline.
+    
+    [dim]Legacy individual operations (--remove-empty-cols, etc.) still work but --clean-* is recommended.[/dim]
     """
     
     # Validaciones iniciales
@@ -89,31 +126,63 @@ def clean_command(
     if show_info and not quiet:
         show_dataframe_info(janitor.get_df(), "Original DataFrame")
     
-    # Construir diccionario de operaciones seleccionadas
-    operation_flags = {
-        'remove_empty_cols': remove_empty_cols,
-        'remove_empty_rows': remove_empty_rows,
-        'standardize_column_names': standardize_column_names,
-        'normalize_column_names': normalize_column_names,
-        'normalize_values': normalize_values,
-        'standardize_values': standardize_values
-    }
-    
-    # Construir parámetros de operaciones
-    operation_params = {
-        'remove_empty_cols_threshold': remove_empty_cols_threshold,
-        'threshold': remove_empty_cols_threshold  # Fallback para compatibilidad
-    }
-    
-    if verbose:
-        selected_ops = [op for op, enabled in operation_flags.items() if enabled]
-        console.print(f"Selected operations: {selected_ops}")
-        if operation_params:
-            console.print(f"Parameters: {operation_params}")
-    
-    # Aplicar operaciones
-    applier = OperationApplier(janitor, verbose=verbose)
-    operations_applied = applier.apply_operations(operation_flags, operation_params)
+    # Handle new smart operations first
+    if clean_all or clean_columns or clean_rows:
+        # Use new smart operations
+        if verbose:
+            selected_ops = []
+            if clean_all: selected_ops.append('clean_all')
+            if clean_columns: selected_ops.append('clean_columns')
+            if clean_rows: selected_ops.append('clean_rows')
+            console.print(f"Smart operations: {selected_ops}")
+            console.print(f"Parameters: empty_threshold={empty_threshold}")
+        
+        # Apply smart operations
+        if clean_all:
+            janitor.clean_all()
+        else:
+            if clean_columns:
+                janitor.clean_columns(
+                    remove_empty=not no_remove_empty_cols,
+                    empty_threshold=empty_threshold,
+                    snake_case=not no_snakecase_cols,
+                    remove_accents=not no_remove_accents_cols
+                )
+            if clean_rows:
+                janitor.clean_rows(
+                    remove_empty=not no_remove_empty_rows,
+                    clean_text=not no_clean_text,
+                    remove_accents=not no_remove_accents_vals,
+                    snakecase=not no_snakecase
+                )
+        
+        operations_applied = True
+        
+    else:
+        # Fallback to legacy operations
+        operation_flags = {
+            'remove_empty_cols': remove_empty_cols,
+            'remove_empty_rows': remove_empty_rows,
+            'standardize_column_names': standardize_column_names,
+            'normalize_column_names': normalize_column_names,
+            'normalize_values': normalize_values,
+            'standardize_values': standardize_values
+        }
+        
+        operation_params = {
+            'remove_empty_cols_threshold': remove_empty_cols_threshold,
+            'threshold': remove_empty_cols_threshold
+        }
+        
+        if verbose:
+            selected_ops = [op for op, enabled in operation_flags.items() if enabled]
+            console.print(f"Legacy operations: {selected_ops}")
+            if operation_params:
+                console.print(f"Parameters: {operation_params}")
+        
+        # Aplicar operaciones legacy
+        applier = OperationApplier(janitor, verbose=verbose)
+        operations_applied = applier.apply_operations(operation_flags, operation_params)
     
     if not operations_applied and not quiet:
         console.print(MESSAGES['no_operations'], style="yellow")
@@ -137,8 +206,11 @@ def clean_command(
     
     # Mostrar resumen
     if operations_applied and not quiet:
-        summary = applier.get_summary()
-        show_processing_summary(summary)
+        if 'applier' in locals():
+            summary = applier.get_summary()
+            show_processing_summary(summary)
+        else:
+            console.print("Operations completed successfully", style="green")
     
     # Mensaje final
     if not quiet:
@@ -205,15 +277,15 @@ def list_operations():
     console.print(f"\n[bold magenta]Total operations available:[/bold magenta] [green]{len(CLEANING_OPERATIONS)}[/green]")
     console.print("[bold yellow]Use multiple flags to chain operations together![/bold yellow]")
     console.print("\n[bold cyan]Quick Examples:[/bold cyan]")
-    console.print("  [dim]# Basic column cleaning[/dim]")
-    console.print("  [green]databroom clean[/green] [cyan]data.csv[/cyan] [blue]--standardize-column-names --output-file clean.csv[/blue]")
+    console.print("  [dim]# Smart clean everything (recommended)[/dim]")
+    console.print("  [green]databroom clean[/green] [cyan]data.csv[/cyan] [blue]--clean-all --output-file clean.csv[/blue]")
     console.print()
-    console.print("  [dim]# Multiple operations with code generation[/dim]")
-    console.print("  [green]databroom clean[/green] [cyan]messy.xlsx[/cyan] [blue]--remove-empty-cols --normalize-values[/blue] \\")
+    console.print("  [dim]# Column cleaning with code generation[/dim]")
+    console.print("  [green]databroom clean[/green] [cyan]messy.xlsx[/cyan] [blue]--clean-columns[/blue] \\")
     console.print("                    [blue]--output-code script.py --verbose[/blue]")
     console.print()
-    console.print("  [dim]# Custom threshold with R output[/dim]")
-    console.print("  [green]databroom clean[/green] [cyan]dataset.json[/cyan] [blue]--remove-empty-cols[/blue] [red]--remove-empty-cols-threshold 0.7[/red] \\")
+    console.print("  [dim]# Advanced options with R output[/dim]")
+    console.print("  [green]databroom clean[/green] [cyan]dataset.json[/cyan] [blue]--clean-rows[/blue] [red]--empty-threshold 0.7 --no-snakecase[/red] \\")
     console.print("                    [blue]--output-code analysis.R --lang r[/blue]")
     console.print()
     console.print("[bold green]Tip:[/bold green] Use [yellow]--help[/yellow] on any command for detailed examples and documentation!")
