@@ -76,12 +76,18 @@ def clean_command(
                                                   help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Remove accents from values (use --clean-rows instead)")] = False,
     standardize_values: Annotated[bool, typer.Option("--standardize-values", 
                                                     help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Clean text values (use --clean-rows instead)")] = False,
+    promote_headers: Annotated[bool, typer.Option("--promote-headers", 
+                                                 help=r"[bold green]\[NEW][/bold green] Promote first row to become column headers and remove it")] = False,
     
     # PARAMETERS
     empty_threshold: Annotated[float, typer.Option("--empty-threshold", 
                                                   help=r"[bold blue]\[PARAMS][/bold blue] Threshold for removing empty columns (0.9 = 90% missing) [dim]default: 0.9[/dim]")] = 0.9,
     remove_empty_cols_threshold: Annotated[float, typer.Option("--remove-empty-cols-threshold", 
-                                                              help=r"[bold yellow]\[LEGACY PARAMS][/bold yellow] Legacy parameter (use --empty-threshold instead)")] = 0.9
+                                                              help=r"[bold yellow]\[LEGACY PARAMS][/bold yellow] Legacy parameter (use --empty-threshold instead)")] = 0.9,
+    promote_headers_row_index: Annotated[int, typer.Option("--promote-headers-row-index", 
+                                                          help=r"[bold blue]\[PARAMS][/bold blue] Row index to promote as headers (0=first row) [dim]default: 0[/dim]")] = 0,
+    promote_headers_drop_row: Annotated[bool, typer.Option("--promote-headers-drop-row/--promote-headers-keep-row", 
+                                                          help=r"[bold blue]\[PARAMS][/bold blue] Drop the promoted row after setting as headers [dim]default: drop (True)[/dim]")] = True
 ):
     """
     [bold]Clean DataFrame with smart operations and generate executable code.[/bold]
@@ -166,12 +172,15 @@ def clean_command(
             'standardize_column_names': standardize_column_names,
             'normalize_column_names': normalize_column_names,
             'normalize_values': normalize_values,
-            'standardize_values': standardize_values
+            'standardize_values': standardize_values,
+            'promote_headers': promote_headers
         }
         
         operation_params = {
             'remove_empty_cols_threshold': remove_empty_cols_threshold,
-            'threshold': remove_empty_cols_threshold
+            'threshold': remove_empty_cols_threshold,
+            'promote_headers_row_index': promote_headers_row_index,
+            'promote_headers_drop_promoted_row': promote_headers_drop_row
         }
         
         if verbose:

@@ -52,7 +52,11 @@ class CodeGenerator:
             'standardize_column_names': {},
             'normalize_column_names': {},
             'normalize_values': {},
-            'standardize_values': {}
+            'standardize_values': {},
+            'promote_headers': {
+                'row_index': 0,
+                'drop_promoted_row': True
+            }
         }
         
     def _load_templates(self):
@@ -220,6 +224,22 @@ class CodeGenerator:
         
         elif func_name == 'clean_all':
             return "# clean_all() combines column and row operations - see individual operations above"
+        
+        elif func_name == 'promote_headers':
+            row_index = params.get('row_index', 0)
+            drop_promoted_row = params.get('drop_promoted_row', True)
+            
+            if row_index == 0 and drop_promoted_row:
+                # Common case: promote first row and remove it
+                return "row_to_names(row_number = 1, remove_row = TRUE)"
+            elif row_index == 0 and not drop_promoted_row:
+                # Promote first row but keep it
+                return "row_to_names(row_number = 1, remove_row = FALSE)"
+            else:
+                # Custom row index
+                r_row_num = row_index + 1  # R is 1-indexed
+                remove_str = "TRUE" if drop_promoted_row else "FALSE"
+                return f"row_to_names(row_number = {r_row_num}, remove_row = {remove_str})"
         
         else:
             # For unknown operations, add a comment

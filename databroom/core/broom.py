@@ -193,3 +193,12 @@ class Broom:
         self.pipeline.execute_operation('clean_all')
         debug_log("clean_all operation completed", "BROOM")
         return self
+    
+    def promote_headers(self, row_index=0, drop_promoted_row=True):
+        """Promote a specific row to become the column headers."""
+        debug_log(f"Broom.promote_headers called with params: row_index={row_index}, drop_promoted_row={drop_promoted_row}", "BROOM")
+        self.pipeline.execute_operation('promote_headers', 
+                                       row_index=row_index,
+                                       drop_promoted_row=drop_promoted_row)
+        debug_log("promote_headers operation completed", "BROOM")
+        return self

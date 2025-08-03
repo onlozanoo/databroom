@@ -125,6 +125,30 @@ def clean_all(df: pd.DataFrame) -> pd.DataFrame:
     return result_df
 
 
+def promote_headers(df: pd.DataFrame, row_index: int = 0, drop_promoted_row: bool = True) -> pd.DataFrame:
+    """Promote a specific row to become the column headers."""
+    
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError("Input must be a pandas DataFrame")
+    
+    if row_index < 0 or row_index >= len(df):
+        raise ValueError(f"row_index must be between 0 and {len(df)-1}")
+    
+    result_df = df.copy()
+    
+    # Get the row to promote as headers
+    new_headers = result_df.iloc[row_index].astype(str).tolist()
+    
+    # Set new column names
+    result_df.columns = new_headers
+    
+    # Drop the promoted row if requested
+    if drop_promoted_row:
+        result_df = result_df.drop(result_df.index[row_index]).reset_index(drop=True)
+    
+    return result_df
+
+
 # Legacy functions for backward compatibility
 def standardize_values(df: pd.DataFrame, columns: list = None) -> pd.DataFrame:
     """Legacy function - Use clean_rows() instead."""
