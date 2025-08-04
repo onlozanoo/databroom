@@ -62,10 +62,10 @@ class Broom:
         # Auto-detect file type if not provided
         if file_type is None:
             if hasattr(file_source, 'name'):  # Uploaded file
-                filename = file_source.name
+                filename = file_source.name.lower()
                 debug_log(f"Uploaded file detected: {filename}", "BROOM")
             else:  # File path
-                filename = str(file_source)
+                filename = str(file_source).lower()
                 debug_log(f"File path detected: {filename}", "BROOM")
             
             if filename.endswith('.csv'):

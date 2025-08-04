@@ -73,30 +73,39 @@ if tu_operacion:
     broom = broom.tu_operacion(param1=param1)
 ```
 
-### **Paso 5: Integración GUI (`app.py`)**
+### **Paso 5: Integración GUI (`components/operations.py`)**
 
-**En la sección apropiada (Structure/Column/Row Operations):**
+**Ubicación**: `databroom/gui/components/operations.py`
+
+**En la función apropiada según el tipo:**
+- `_render_structure_operations()` - Para operaciones de estructura 
+- `_render_column_operations()` - Para operaciones de columnas
+- `_render_row_operations()` - Para operaciones de filas
+
 ```python
-# Botón principal
-if st.button("🔧 Tu Operación", key="tu_operacion_btn"):
-    param1 = st.session_state.get('tu_op_param1', default)
+def _render_tu_operacion():
+    """Render tu nueva operación."""
+    col1, col2 = st.columns([3, 1])
     
-    # Validaciones
-    if param1 < 0:
-        st.error("❌ Parámetro inválido")
-        return
+    with col1:
+        if st.button("🔧 Tu Operación", key="tu_operacion_btn"):
+            # Obtener parámetros y ejecutar
+            param1 = st.session_state.get('tu_op_param1', default)
+            st.session_state.broom.tu_operacion(param1=param1)
+            sync_history()  # Importar de databroom.gui.utils.session
+            st.success("✅ Operación aplicada!")
+            st.rerun()
     
-    # Ejecutar operación
-    st.session_state.broom.tu_operacion(param1=param1)
-    st.session_state.cleaning_history = st.session_state.broom.get_history().copy()
-    st.success("✅ Operación aplicada!")
-    st.rerun()
+    with col2:
+        if st.button("⚙️", key="config_tu_operacion"):
+            st.session_state['show_config'] = not st.session_state.get('show_config', False)
+    
+    # Configuración
+    if st.session_state.get('show_config', False):
+        st.session_state['tu_op_param1'] = st.number_input("Parámetro 1", value=default)
 
-# Configuración de parámetros
-if st.session_state.get('show_config', False):
-    st.session_state['tu_op_param1'] = st.number_input(
-        "Parámetro 1", value=default, help="Descripción"
-    )
+# Llamar desde la función principal apropiada:
+# _render_tu_operacion()
 ```
 
 ## 🚀 Lo que funciona automáticamente
@@ -108,7 +117,7 @@ if st.session_state.get('show_config', False):
 
 ### ⚙️ **Manual:**
 - **CLI**: Parámetros y lógica en `commands.py`
-- **GUI**: Botones y configuración en `app.py`  
+- **GUI**: Componentes en `components/operations.py` (estructura modular)
 - **Código R**: Equivalente en `base.py`
 
 ## 📝 Ejemplo: `promote_headers`
@@ -163,16 +172,18 @@ def clean(promote_headers: bool, promote_row_index: int):
         broom = broom.promote_headers(row_index=promote_row_index)
 ```
 
-**5. app.py:**
+**5. components/operations.py:**
 ```python
-if st.button("📌 Promote Headers", key="promote_headers_btn"):
-    row_index = st.session_state.get('promote_row_index', 0)
-    if row_index >= len(st.session_state.broom.get_df()):
-        st.error("❌ Row index out of range")
-        return
-    st.session_state.broom.promote_headers(row_index=row_index)
-    st.success("📌 Headers promoted!")
-    st.rerun()
+def _render_promote_headers():
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        if st.button("📌 Promote Headers", key="promote_headers_btn"):
+            row_index = st.session_state.get('promote_headers_row_index', 0)
+            st.session_state.broom.promote_headers(row_index=row_index)
+            sync_history()
+            st.success("📌 Headers promoted!")
+            st.rerun()
+    # Llamada desde _render_structure_operations()
 ```
 
 ## ✅ Checklist de verificación
@@ -184,7 +195,7 @@ if st.button("📌 Promote Headers", key="promote_headers_btn"):
 
 ### **Interfaces:**
 - [ ] CLI: Parámetros y lógica en `commands.py`
-- [ ] GUI: Botón y configuración en `app.py`
+- [ ] GUI: Componente en `components/operations.py` en sección apropiada
 
 ### **Testing:**
 - [ ] API programática funciona
@@ -215,9 +226,14 @@ databroom clean data.csv --promote-headers --promote-row-index 1 --output-file c
 ```
 
 ### GUI:
-1. Cargar archivo
-2. Ir a "Structure Operations" 
-3. Configurar parámetros
+1. Cargar archivo en sidebar
+2. Ir a sección "Structure Operations" 
+3. Configurar parámetros con botón ⚙️
 4. Hacer clic en "📌 Promote Headers"
 
-Con esta guía sistemática, añadir operaciones debería ser sencillo y completo. 🧹✨
+**Arquitectura GUI modular:**
+- **app.py** (83 líneas): Orchestrador principal
+- **components/**: Componentes reutilizables organizados por responsabilidad
+- **utils/**: Utilidades (session, styles) compartidas
+
+Con esta guía sistemática y arquitectura modular, añadir operaciones es sencillo, escalable y mantenible. 🧹✨

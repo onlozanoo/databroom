@@ -297,6 +297,7 @@ generator.export_code('my_cleaning_pipeline.py')
 | Operation | CLI Flag | Purpose |
 |-----------|----------|---------|
 | **🧹 Clean All** | `--clean-all` | **Smart clean everything: columns + rows with all operations** |
+| **📌 Promote Headers** | `--promote-headers` | **Convert a data row to column headers** |
 | **📋 Clean Columns** | `--clean-columns` | Clean column names: snake_case + remove accents + remove empty |
 | **📊 Clean Rows** | `--clean-rows` | Clean row data: snake_case + remove accents + remove empty |
 | ~~Remove Empty Columns~~ | ~~`--remove-empty-cols`~~ | ~~Legacy: Use `--clean-columns` instead~~ |
@@ -313,6 +314,11 @@ generator.export_code('my_cleaning_pipeline.py')
 --clean-all                          # Clean everything: columns + rows
 --clean-columns                      # Clean column names only
 --clean-rows                         # Clean row data only
+
+# Structure Operations
+--promote-headers                    # Convert data row to column headers
+--promote-row-index 1                # Row index to promote (default: 0)
+--keep-promoted-row                  # Keep the promoted row in data
 
 # Advanced Options (disable specific operations)
 --no-snakecase                       # Keep original text case in rows
@@ -383,15 +389,23 @@ databroom/
 │   ├── operations.py    # Operation parsing and execution
 │   └── utils.py         # File handling and code generation
 ├── core/                # Core cleaning engine
-│   ├── janitor.py       # Main API with method chaining
+│   ├── broom.py         # Main API with method chaining
 │   ├── pipeline.py      # Operation coordination and state management  
 │   ├── cleaning_ops.py  # Individual cleaning operations
 │   └── history_tracker.py # Automatic operation tracking
 ├── generators/          # Code generation system
 │   ├── base.py          # Template-based code generator
 │   └── templates/       # Jinja2 templates for Python/R
-├── gui/                 # Streamlit web interface
-│   └── app.py           # Interactive GUI application
+├── gui/                 # Modular Streamlit web interface
+│   ├── app.py           # Main orchestrator (83 lines)
+│   ├── components/      # Reusable UI components
+│   │   ├── file_upload.py    # File upload and processing
+│   │   ├── operations.py     # Data cleaning operations
+│   │   ├── controls.py       # Step back, reset, reload controls
+│   │   └── tabs.py          # Data display and export tabs
+│   └── utils/           # GUI utilities
+│       ├── session.py        # Session state management
+│       └── styles.py         # CSS styling and theming
 └── tests/               # Comprehensive test suite
 ```
 
@@ -456,14 +470,16 @@ mypy databroom/
 **Current Version**: v0.3.1 - **Production Ready & Live on PyPI**
 
 ✅ **Fully Implemented**
-- **Smart Operations**: `--clean-all`, `--clean-columns`, `--clean-rows`
+- **Smart Operations**: `--clean-all`, `--clean-columns`, `--clean-rows`, `--promote-headers`
+- **Modular GUI Architecture**: Organized components with 86% code reduction
 - Complete CLI with simplified and legacy operations
-- Interactive Streamlit GUI with live preview
+- Interactive Streamlit GUI with live preview and organized operations
 - Programmatic API with method chaining
 - Python and R code generation with parameter filtering
 - Comprehensive test suite
 - **Live on PyPI**: `pip install databroom`
 - Dynamic new operations loading system
+- Extensible component-based GUI structure
 
 🚧 **In Active Development**  
 - Extended cleaning operations library
