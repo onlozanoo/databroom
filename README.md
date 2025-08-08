@@ -300,12 +300,6 @@ generator.export_code('my_cleaning_pipeline.py')
 | **📌 Promote Headers** | `--promote-headers` | **Convert a data row to column headers** |
 | **📋 Clean Columns** | `--clean-columns` | Clean column names: snake_case + remove accents + remove empty |
 | **📊 Clean Rows** | `--clean-rows` | Clean row data: snake_case + remove accents + remove empty |
-| ~~Remove Empty Columns~~ | ~~`--remove-empty-cols`~~ | ~~Legacy: Use `--clean-columns` instead~~ |
-| ~~Remove Empty Rows~~ | ~~`--remove-empty-rows`~~ | ~~Legacy: Use `--clean-rows` instead~~ |
-| ~~Standardize Column Names~~ | ~~`--standardize-column-names`~~ | ~~Legacy: Use `--clean-columns` instead~~ |
-| ~~Normalize Column Names~~ | ~~`--normalize-column-names`~~ | ~~Legacy: Use `--clean-columns` instead~~ |
-| ~~Normalize Values~~ | ~~`--normalize-values`~~ | ~~Legacy: Use `--clean-rows` instead~~ |
-| ~~Standardize Values~~ | ~~`--standardize-values`~~ | ~~Legacy: Use `--clean-rows` instead~~ |
 
 ### CLI Parameters
 
