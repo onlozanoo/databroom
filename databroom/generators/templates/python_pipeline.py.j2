@@ -7,21 +7,21 @@ import pandas as pd
 from databroom.core.broom import Broom
 
 # Load your dataset using Databroom
-broom_instance = Broom.from_csv("{{ filename or 'your_data_file.csv' }}")
-print(f"Original shape: {broom_instance.get_df().shape}")
+df = Broom.from_csv("{{ filename or 'your_data_file.csv' }}")
+print(f"Original shape: {df.get_df().shape}")
 
 # Apply cleaning operations
 {{steps}}
 
 # Get the cleaned DataFrame
-df_cleaned = broom_instance.pipeline.df
+df_cleaned = df.pipeline.df
 
 # Display results
 print("Data cleaning completed!")
-print(f"Original shape: {broom_instance.pipeline.df_original.shape}")
+print(f"Original shape: {df.pipeline.df_original.shape}")
 print(f"Final shape: {df_cleaned.shape}")
-print(f"Columns removed: {broom_instance.pipeline.df_original.shape[1] - df_cleaned.shape[1]}")
-print(f"Rows removed: {broom_instance.pipeline.df_original.shape[0] - df_cleaned.shape[0]}")
+print(f"Columns removed: {df.pipeline.df_original.shape[1] - df_cleaned.shape[1]}")
+print(f"Rows removed: {df.pipeline.df_original.shape[0] - df_cleaned.shape[0]}")
 print("\nFirst 5 rows of cleaned data:")
 print(df_cleaned.head())
 

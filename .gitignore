@@ -24,3 +24,4 @@ test*
 generated*.py
 README_PYPI.md
 venv/
+*.swp

@@ -1,6 +1,7 @@
 # pipeline.py
 
 from databroom.core.history_tracker import CleaningCommand
+from databroom.core.pipeline_io import save_pipeline, load_pipeline
 from databroom.core.debug_logger import debug_log
 from databroom.core import cleaning_ops
 import inspect
@@ -103,3 +104,74 @@ class CleaningPipeline:
             debug_log(f"Snapshot stored - Total snapshots: {len(self.df_snapshots)}", "PIPELINE")
         
         return self.df
+    
+    def save_pipeline(self, path: str):
+        """ Save the data pipeline from a Broom instance. Return True if successful."""
+        
+        return save_pipeline(self.history_list, path)
+    
+    def load_pipeline(self):
+        """ Load data into a Broom instance."""
+        loaded_history = load_pipeline()
+        return loaded_history
+    
+    def run_pipeline(self, loaded_history: bool = False):
+        
+        if loaded_history == False:
+            debug_log("No history provided - Loading Pipeline", "PIPELINE")
+            loaded_history = load_pipeline()
+        else:
+            debug_log("History provided - Running Pipeline", "PIPELINE")
+        
+
+        debug_log(f"Loaded history with {len(loaded_history)} entries", "PIPELINE")
+        self.history_list = loaded_history
+        # Reapply operations to the original DataFrame to reconstruct current state
+        self.df = self.df_original.copy()
+        self.df_snapshots = [self.df.copy()]
+        for record in self.history_list:
+            operation = record['function']
+            args = record['args']
+            kwargs = record['kwargs']
+            debug_log(f"Reapplying operation: {operation} with args: {args}, kwargs: {kwargs}", "PIPELINE")
+            self.execute_operation(operation, *args, **kwargs)
+        debug_log(f"Pipeline reconstructed - Current DataFrame shape: {self.df.shape}, snapshots: {len(self.df_snapshots)}", "PIPELINE")
+
+        return
+    
+if __name__ == "__main__":
+    import pandas as pd
+    # Example usage
+    df = pd.DataFrame({
+        'A': [1, 2, None, 4],
+        'B': [None, None, None, None],
+        'C': [1, 2, 3, 4]
+    })
+    
+    pipeline = CleaningPipeline(df)
+    print("Original DataFrame:")
+    print(pipeline.get_current_dataframe())
+    
+    pipeline.execute_operation('remove_empty_cols')
+    print("\nAfter removing empty columns:")
+    print(pipeline.get_current_dataframe())
+    
+    pipeline.execute_operation('remove_empty_rows')
+    print("\nAfter removing empty rows:")
+    print(pipeline.get_current_dataframe())
+    
+    print("\nOperation History:")
+    for record in pipeline.get_history():
+        print(record)
+        
+        
+    if pipeline.can_step_back():
+        pipeline.step_back()
+        print("\nAfter stepping back:")
+        print(pipeline.get_current_dataframe())
+    
+    if pipeline.can_step_back():
+        pipeline.step_back()
+        print("\nAfter stepping back again:")
+        print(pipeline.get_current_dataframe())
+        

@@ -87,10 +87,18 @@ def CleaningCommand(function=None, history_list=None):
                     debug_log(f"Shape change detected: {shape_info}", "HISTORY")
                 
                 # Create comprehensive log entry
-                log_entry = (
-                    f"{timestamp} - {func.__name__} called. "
-                    f"Parameters: {kwargs}{shape_info}"
-                )
+                log_entry = {
+                    "timestamp": timestamp,
+                    "function": func.__name__,
+                    "args": args[1:],
+                    "kwargs": kwargs,
+                    "shape_change": {
+                        "before": df_state.get("shape_before"),
+                        "after": df_state.get("shape_after")
+                    },
+                    "percent_missing_before": df_state.get("percent_missing_before"),
+                    "percent_missing_after": df_state.get("percent_missing_after"),
+                }
                 history_list.append(log_entry)
                 debug_log(f"History entry added - Total entries: {len(history_list)}", "HISTORY")
                 debug_log(f"Entry content: {log_entry}", "HISTORY")

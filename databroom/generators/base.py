@@ -86,10 +86,10 @@ class CodeGenerator:
         """
         
         # Filter the history to include only code snippets
-        history_funcs = [snippet.split('called')[0].split()[-1] for snippet in history]
-        history_params = [snippet.split('Parameters: ')[1].split(". ")[0] for snippet in history]
-        self.history = list(zip(history_funcs, history_params))
         
+        history_funcs = [snippet['function'] for snippet in history]
+        history_params = [snippet['kwargs'] for snippet in history]
+        self.history = list(zip(history_funcs, history_params))
         
         return self.history
      
@@ -128,9 +128,7 @@ class CodeGenerator:
         
         # Generate code based on the loaded history and templates
         if self.language == 'python':
-            for func, params_str in self.history:
-                # Convert the string to a real dict (safe with ast.literal_eval)
-                params_dict = ast.literal_eval(params_str)
+            for func, params_dict in self.history:
                 
                 # Filter out default parameters for cleaner code
                 filtered_params = self._filter_non_default_params(func, params_dict)
@@ -140,15 +138,13 @@ class CodeGenerator:
                 
                 # Build the code line
                 if code == "":
-                    code = f"broom_instance = broom_instance.{func}({params_formatted})"
+                    code = f"df = df.{func}({params_formatted})"
                 else:
                     code += f".{func}({params_formatted})"
         
         elif self.language == 'R':
             code_lines = []
-            for func, params_str in self.history:
-                # Convert the string to a real dict (safe with ast.literal_eval)
-                params_dict = ast.literal_eval(params_str)
+            for func, params_dict in self.history:
                 
                 # Filter out default parameters for cleaner code
                 filtered_params = self._filter_non_default_params(func, params_dict)
@@ -279,13 +275,14 @@ if __name__ == "__main__":
     
     # Example usage
     # Assuming Broom class and its methods are defined in databroom.core.broom
-    test_df = Broom.from_excel(r'Z:\Direccion Comercial\Informes\18-07-2025.xlsx')
+    test_df = Broom.from_file('dataset.csv')
     test_df = test_df.remove_empty_cols(threshold=0.9).standardize_column_names().normalize_column_names().standardize_values()
-    code = CodeGenerator('R')
+    code = CodeGenerator('python')
     #print(test_df.get_history())
     print(code.templates)
     history = code.load_history(test_df.get_history())
     #print(history)
 
     print(code.generate_code())
-    code.export_code(r'C:\Users\Olive\Documents\Proyectos DS\Janitor\databroom\test_generated_pipeline.R')
+    print(type(test_df))
+    code.export_code(r'..\..\generated_code.py')

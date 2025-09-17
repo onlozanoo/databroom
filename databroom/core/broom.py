@@ -126,6 +126,18 @@ class Broom:
         self.pipeline.step_back()
         return self
     
+    def save_pipeline(self):
+        """ Save the data pipeline from a Broom instance. Return True if successful."""
+        return self.pipeline.save_pipeline()
+         
+    def load_pipeline(self):
+        """ Load data into a Broom instance."""
+        return self.pipeline.load_pipeline()
+    
+    def run_pipeline(self, loaded_history: bool = False, path: str = "pipeline.json"):
+        """ Execute the saved pipeline on the current DataFrame."""
+        return self.pipeline.run_pipeline(loaded_history, path)
+    
     def remove_empty_cols(self, threshold: float = 0.9):
         """Remove empty columns based on a threshold of non-null values."""
         debug_log(f"Broom.remove_empty_cols called with threshold: {threshold}", "BROOM")

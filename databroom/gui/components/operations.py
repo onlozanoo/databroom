@@ -24,25 +24,38 @@ def render_operations():
     _render_row_operations()
 
 def _render_quick_access():
-    """Render the Clean All quick access button."""
-    if st.button(
-        "🧹 Clean All",
-        help="Applies all cleaning operations to both columns and rows",
-        use_container_width=True,
-        type="primary"
-    ):
-        debug_log("Clean All clicked", "GUI")
-        st.session_state.last_interaction = 'clean_all'
-        debug_log(f"Before operation - Shape: {st.session_state.broom.get_df().shape}", "GUI")
-        
-        st.session_state.broom.clean_all()
-        
-        debug_log(f"After operation - Shape: {st.session_state.broom.get_df().shape}", "GUI")
-        sync_history()
-        st.session_state.cleaning_history.append("GUI: Applied complete cleaning (clean_all)")
-        debug_log(f"Synced history - Total operations: {len(st.session_state.cleaning_history)}", "GUI")
-        st.success("🧹 Complete cleaning applied!")
-        st.rerun()
+    """Render the Clean All quick access button with confirmation."""
+    if st.session_state.get('confirm_clean_all', False):
+        st.warning("⚠️ Are you sure you want to apply all cleaning operations? This will clean both columns and rows.")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("✅ Yes, Clean All", use_container_width=True, type="primary"):
+                debug_log("Clean All confirmed", "GUI")
+                st.session_state.last_interaction = 'clean_all'
+                debug_log(f"Before operation - Shape: {st.session_state.broom.get_df().shape}", "GUI")
+
+                st.session_state.broom.clean_all()
+
+                debug_log(f"After operation - Shape: {st.session_state.broom.get_df().shape}", "GUI")
+                sync_history()
+                st.session_state.cleaning_history.append("GUI: Applied complete cleaning (clean_all)")
+                debug_log(f"Synced history - Total operations: {len(st.session_state.cleaning_history)}", "GUI")
+                st.success("🧹 Complete cleaning applied!")
+                st.session_state['confirm_clean_all'] = False
+                st.rerun()
+        with col2:
+            if st.button("❌ Cancel", use_container_width=True):
+                st.session_state['confirm_clean_all'] = False
+                st.rerun()
+    else:
+        if st.button(
+            "🧹 Clean All",
+            help="Applies all cleaning operations to both columns and rows",
+            use_container_width=True,
+            type="primary"
+        ):
+            st.session_state['confirm_clean_all'] = True
+            st.rerun()
 
 def _render_structure_operations():
     """Render structure operations like promote_headers."""
