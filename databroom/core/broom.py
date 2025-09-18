@@ -126,13 +126,13 @@ class Broom:
         self.pipeline.step_back()
         return self
     
-    def save_pipeline(self):
+    def save_pipeline(self, path:str = 'pipeline.json'):
         """ Save the data pipeline from a Broom instance. Return True if successful."""
-        return self.pipeline.save_pipeline()
+        return self.pipeline.save_pipeline(path)
          
-    def load_pipeline(self):
+    def load_pipeline(self, path: str):
         """ Load data into a Broom instance."""
-        return self.pipeline.load_pipeline()
+        return self.pipeline.load_pipeline(path)
     
     def run_pipeline(self, loaded_history: bool = False, path: str = "pipeline.json"):
         """ Execute the saved pipeline on the current DataFrame."""

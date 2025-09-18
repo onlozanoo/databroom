@@ -1,3 +1,3 @@
-from .base import BaseGenerator
+from .base import CodeGenerator
 
-__all__ = ["BaseGenerator"]
+__all__ = ["CodeGenerator"]

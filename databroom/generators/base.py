@@ -23,7 +23,7 @@ if __name__ == "__main__":# and __package__ is None:
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
 
-from databroom.core.broom import Broom 
+from databroom import Broom 
 
 class CodeGenerator:
     def __init__(self, language):

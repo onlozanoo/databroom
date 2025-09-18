@@ -64,6 +64,15 @@ class CleaningPipeline:
         debug_log(f"Stepped back - New shape: {self.df.shape}, snapshots: {len(self.df_snapshots)}, history: {len(self.history_list)}", "PIPELINE")
         
         return self.df
+    
+    def restore(self):
+        """Restore the DataFrame to its original state."""
+        debug_log("Restoring DataFrame to original state", "PIPELINE")
+        self.df = self.df_original.copy()
+        self.history_list = []
+        self.df_snapshots = [self.df_original.copy()]
+        debug_log(f"DataFrame restored - Shape: {self.df.shape}, snapshots: {len(self.df_snapshots)}, history cleared", "PIPELINE")
+        return self.df
         
     def execute_operation(self, operation, *args, **kwargs):
         """
@@ -110,26 +119,28 @@ class CleaningPipeline:
         
         return save_pipeline(self.history_list, path)
     
-    def load_pipeline(self):
+    def load_pipeline(self, path: str):
         """ Load data into a Broom instance."""
-        loaded_history = load_pipeline()
+        loaded_history = load_pipeline(path)
         return loaded_history
     
-    def run_pipeline(self, loaded_history: bool = False):
+    def run_pipeline(self, path: str, loaded_history: bool = False):
         
         if loaded_history == False:
             debug_log("No history provided - Loading Pipeline", "PIPELINE")
-            loaded_history = load_pipeline()
+            loaded_history = load_pipeline(path)
         else:
             debug_log("History provided - Running Pipeline", "PIPELINE")
         
 
         debug_log(f"Loaded history with {len(loaded_history)} entries", "PIPELINE")
         self.history_list = loaded_history
+        print(self.history_list)
         # Reapply operations to the original DataFrame to reconstruct current state
         self.df = self.df_original.copy()
         self.df_snapshots = [self.df.copy()]
-        for record in self.history_list:
+        for record_index in range(len(self.history_list)):
+            record = self.history_list[record_index]
             operation = record['function']
             args = record['args']
             kwargs = record['kwargs']
@@ -164,14 +175,13 @@ if __name__ == "__main__":
     for record in pipeline.get_history():
         print(record)
         
-        
-    if pipeline.can_step_back():
-        pipeline.step_back()
-        print("\nAfter stepping back:")
-        print(pipeline.get_current_dataframe())
+    pipeline.save_pipeline("pipeline.json")
     
-    if pipeline.can_step_back():
-        pipeline.step_back()
-        print("\nAfter stepping back again:")
-        print(pipeline.get_current_dataframe())
+    pipeline.restore()
+    print(pipeline.get_current_dataframe())
+    
+    pipeline.run_pipeline(path="pipeline.json")
+    
+    print("\nAfter re-running the saved pipeline:")
+    print(pipeline.get_current_dataframe())
         
