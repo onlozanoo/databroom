@@ -4,7 +4,7 @@
 
 # Required installation: pip install databroom
 import pandas as pd
-from databroom.core.broom import Broom
+from databroom import Broom
 
 # Load your dataset using Databroom
 df = Broom.from_csv("{{ filename or 'your_data_file.csv' }}")

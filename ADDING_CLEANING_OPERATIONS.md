@@ -237,3 +237,5 @@ databroom clean data.csv --promote-headers --promote-row-index 1 --output-file c
 - **utils/**: Utilidades (session, styles) compartidas
 
 Con esta guía sistemática y arquitectura modular, añadir operaciones es sencillo, escalable y mantenible. 🧹✨
+
+

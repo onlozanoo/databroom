@@ -46,6 +46,7 @@
   - [🤝 Contributing](#-contributing)
     - [**Ways to Contribute**](#ways-to-contribute)
   - [📄 License](#-license)
+  - [🔗 Links](#-links)
 
 ---
 
@@ -236,10 +237,10 @@ databroom gui
 Use Databroom directly in your Python scripts:
 
 ```python
-from databroom.core.broom import Broom
+from databroom import Broom
 
 # Load and clean data with method chaining
-broom = Broom.from_csv('data.csv')
+broom = Broom.from_file('data.csv')
 result = broom.clean_all()  # Smart clean everything
 
 # Or use specific operations
@@ -252,7 +253,7 @@ cleaned_df = result.get_df()
 print(f"Cleaned {cleaned_df.shape[0]} rows × {cleaned_df.shape[1]} columns")
 
 # Generate reproducible code
-from databroom.generators.base import CodeGenerator
+from databroom import CodeGenerator
 generator = CodeGenerator('python')
 generator.load_history(result.get_history())
 generator.export_code('my_cleaning_pipeline.py')
