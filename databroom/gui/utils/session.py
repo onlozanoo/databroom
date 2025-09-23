@@ -33,6 +33,15 @@ def initialize_session_state():
     if 'last_interaction' not in st.session_state:
         st.session_state.last_interaction = None
         debug_log("Initialized last_interaction in session state", "GUI")
+
+    # Pipeline upload tracking
+    if 'uploaded_pipeline' not in st.session_state:
+        st.session_state.uploaded_pipeline = None
+        debug_log("Initialized uploaded_pipeline in session state", "GUI")
+
+    if 'uploaded_pipeline_name' not in st.session_state:
+        st.session_state.uploaded_pipeline_name = None
+        debug_log("Initialized uploaded_pipeline_name in session state", "GUI")
     
     debug_log(f"Session state summary - Broom: {st.session_state.broom is not None}, "
               f"History length: {len(st.session_state.cleaning_history)}", "GUI")
@@ -53,4 +62,6 @@ def reset_data():
     st.session_state.original_df = None
     st.session_state.cleaning_history = []
     st.session_state.uploaded_file_name = None
+    st.session_state.uploaded_pipeline = None
+    st.session_state.uploaded_pipeline_name = None
     debug_log("Reset all data in session state", "GUI")

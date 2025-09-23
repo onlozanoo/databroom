@@ -63,10 +63,129 @@ def _render_current_data_tab():
 def _render_history_tab():
     """Render the cleaning history tab."""
     st.subheader("Cleaning History")
+
+    # Pipeline upload and run section
+    st.markdown("---")
+    st.subheader("Run Saved Pipeline")
+
+    # File uploader for pipeline JSON
+    pipeline_file = st.file_uploader(
+        "Upload Pipeline JSON File",
+        type=['json'],
+        help="Upload a saved pipeline JSON file to run on current data",
+        key="pipeline_uploader"
+    )
+
+    if pipeline_file is not None:
+        # Store pipeline content in session state
+        if 'uploaded_pipeline' not in st.session_state or st.session_state.uploaded_pipeline_name != pipeline_file.name:
+            try:
+                import json
+                pipeline_data = json.load(pipeline_file)
+                st.session_state.uploaded_pipeline = pipeline_data
+                st.session_state.uploaded_pipeline_name = pipeline_file.name
+                st.success(f"✅ Pipeline loaded: {pipeline_file.name}")
+                st.info(f"Contains {len(pipeline_data)} operations")
+            except Exception as e:
+                st.error(f"Error loading pipeline: {e}")
+                st.session_state.uploaded_pipeline = None
+                st.session_state.uploaded_pipeline_name = None
+
+    # Run Pipeline button
+    if st.session_state.get('uploaded_pipeline') and st.session_state.broom:
+        if st.button(
+            "🚀 Run Pipeline",
+            help="Execute the loaded pipeline on current data",
+            use_container_width=True,
+            type="primary",
+            key="run_pipeline_btn"
+        ):
+            try:
+                # Execute pipeline
+                loaded_history = st.session_state.uploaded_pipeline
+                st.session_state.broom.pipeline.run_pipeline(None, loaded_history)
+
+                # Sync session state
+                from databroom.gui.utils.session import sync_history
+                sync_history()
+
+                st.success("✅ Pipeline executed successfully!")
+                st.info(f"Applied {len(loaded_history)} operations")
+                st.rerun()
+
+            except Exception as e:
+                st.error(f"Error executing pipeline: {e}")
+    elif st.session_state.get('uploaded_pipeline') and not st.session_state.broom:
+        st.warning("Load data first before running a pipeline")
+    elif not st.session_state.get('uploaded_pipeline'):
+        st.info("Upload a pipeline JSON file to run it")
+
+    st.markdown("---")
+
+    # Save Pipeline section
+    st.markdown("---")
+    st.subheader("💾 Save Current Pipeline")
+
+    # Save pipeline button
+    if st.session_state.broom and len(st.session_state.cleaning_history) > 0:
+        col1, col2 = st.columns([3, 1])
+
+        with col1:
+            pipeline_filename = st.text_input(
+                "Pipeline filename:",
+                value="cleaning_pipeline.json",
+                help="Name for the pipeline JSON file",
+                key="pipeline_filename"
+            )
+
+        with col2:
+            if st.button(
+                "💾 Save Pipeline",
+                help="Save the current cleaning operations as a reusable pipeline",
+                use_container_width=True,
+                type="secondary",
+                key="save_pipeline_btn"
+            ):
+                try:
+                    # Save the pipeline
+                    success = st.session_state.broom.save_pipeline(pipeline_filename)
+
+                    if success:
+                        st.success(f"✅ Pipeline saved as: {pipeline_filename}")
+                        st.info(f"Contains {len(st.session_state.cleaning_history)} operations")
+
+                        # Provide download link
+                        try:
+                            with open(pipeline_filename, 'r') as f:
+                                pipeline_content = f.read()
+                            st.download_button(
+                                label="📥 Download Pipeline File",
+                                data=pipeline_content,
+                                file_name=pipeline_filename,
+                                mime="application/json",
+                                help="Download the pipeline JSON file"
+                            )
+                        except Exception as e:
+                            st.warning(f"Pipeline saved but download preparation failed: {e}")
+                    else:
+                        st.error(f"❌ Failed to save pipeline to: {pipeline_filename}")
+
+                except Exception as e:
+                    st.error(f"Error saving pipeline: {e}")
+    elif not st.session_state.broom:
+        st.info("Load data first before saving a pipeline")
+    else:
+        st.info("Perform some cleaning operations first to save a pipeline")
+
+    st.markdown("---")
+    st.markdown("---")
+
+    # Current cleaning history
+    st.subheader("Current Session History")
     if st.session_state.cleaning_history:
         for i, operation in enumerate(st.session_state.cleaning_history, 1):
             st.write(f"{i}. {operation}")
-        
+
         # Show technical history from broom
         with st.expander("Technical Details"):
             history = st.session_state.broom.get_history()

@@ -37,7 +37,7 @@ def load_pipeline(path: str):
         with open(path, "r", encoding="utf-8") as f:
             pipeline = json.load(f)
     except json.JSONDecodeError as e:
-        print("Error de formato:", e)
+        print("Format error:", e)
         return None
     return pipeline
 

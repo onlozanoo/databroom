@@ -20,7 +20,7 @@ from .config import (
 console = Console()
 
 def validate_input_file(file_path: str) -> bool:
-    """Valida que el archivo de entrada exista y tenga formato soportado"""
+    """Validates that the input file exists and has a supported format"""
     if not os.path.exists(file_path):
         console.print(MESSAGES['file_not_found'].format(path=file_path), style="red")
         return False
@@ -39,7 +39,7 @@ def validate_input_file(file_path: str) -> bool:
     return True
 
 def validate_output_file(file_path: str) -> bool:
-    """Valida que el archivo de salida tenga formato soportado"""
+    """Validates that the output file has a supported format"""
     ext = Path(file_path).suffix.lower()
     if ext not in SUPPORTED_OUTPUT_FORMATS:
         console.print(
@@ -51,7 +51,7 @@ def validate_output_file(file_path: str) -> bool:
         )
         return False
     
-    # Verificar que el directorio padre exista
+    # Verify that the parent directory exists
     parent_dir = Path(file_path).parent
     if not parent_dir.exists():
         try:
@@ -63,9 +63,9 @@ def validate_output_file(file_path: str) -> bool:
     return True
 
 def load_dataframe(file_path: str, **kwargs) -> Optional[Broom]:
-    """Carga DataFrame usando factory methods de Broom"""
+    """Loads DataFrame using Broom factory methods"""
     try:
-        # Auto-detección usando el método from_file de Broom
+        # Auto-detection using Broom's from_file method
         broom = Broom.from_file(file_path, **kwargs)
         return broom
     except Exception as e:
@@ -73,7 +73,7 @@ def load_dataframe(file_path: str, **kwargs) -> Optional[Broom]:
         return None
 
 def save_dataframe(df: pd.DataFrame, output_path: str) -> bool:
-    """Guarda DataFrame según la extensión del archivo"""
+    """Saves DataFrame based on file extension"""
     try:
         ext = Path(output_path).suffix.lower()
         
@@ -95,9 +95,9 @@ def save_dataframe(df: pd.DataFrame, output_path: str) -> bool:
         return False
 
 def generate_and_save_code(broom: Broom, output_path: str, language: str) -> bool:
-    """Genera y guarda código usando CodeGenerator"""
+    """Generates and saves code using CodeGenerator"""
     try:
-        # Normalizar idioma
+        # Normalize language
         lang_map = {'py': 'python', 'python': 'python', 'r': 'r'}
         lang = lang_map.get(language.lower(), 'python')
         
@@ -105,7 +105,7 @@ def generate_and_save_code(broom: Broom, output_path: str, language: str) -> boo
             console.print(f"Unsupported language: {language}", style="red")
             return False
         
-        # Generar código usando plantillas Jinja2
+        # Generate code using Jinja2 templates
         generator = CodeGenerator(language=lang)
         generator.load_history(broom.get_history())
         generator.export_code(output_path)
@@ -118,18 +118,18 @@ def generate_and_save_code(broom: Broom, output_path: str, language: str) -> boo
         return False
 
 def show_dataframe_info(df: pd.DataFrame, title: str = "DataFrame Info"):
-    """Muestra información del DataFrame en formato tabla"""
+    """Displays DataFrame information in table format"""
     table = Table(title=title, show_header=True, header_style="bold magenta")
     table.add_column("Property", style="cyan")
     table.add_column("Value", style="white")
     
-    # Información básica
+    # Basic information
     table.add_row("Shape", f"{df.shape[0]:,} rows × {df.shape[1]:,} columns")
     table.add_row("Memory Usage", f"{df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
     table.add_row("Null Values", f"{df.isnull().sum().sum():,}")
     table.add_row("Duplicate Rows", f"{df.duplicated().sum():,}")
     
-    # Tipos de datos
+    # Data types
     dtype_counts = df.dtypes.value_counts()
     dtype_str = ", ".join([f"{count} {dtype}" for dtype, count in dtype_counts.items()])
     table.add_row("Data Types", dtype_str)
@@ -137,11 +137,11 @@ def show_dataframe_info(df: pd.DataFrame, title: str = "DataFrame Info"):
     console.print(table)
 
 def show_processing_summary(summary: Dict[str, Any]):
-    """Muestra resumen de procesamiento"""
+    """Displays processing summary"""
     if not summary['operations_applied']:
         return
     
-    # Panel principal
+    # Main panel
     summary_text = f"""
 [bold green]Operations Applied:[/bold green] {len(summary['operations_applied'])}
 {', '.join(summary['operations_applied'])}
@@ -165,12 +165,12 @@ Saved: {(summary['memory_before'] - summary['memory_after']) / 1024**2:.2f} MB
     ))
 
 def detect_file_type(file_path: str) -> Optional[str]:
-    """Detecta tipo de archivo por extensión"""
+    """Detects file type by extension"""
     ext = Path(file_path).suffix.lower()
     return FILE_TYPE_MAPPING.get(ext)
 
 def format_size(size_bytes: int) -> str:
-    """Formatea tamaño de archivo en formato legible"""
+    """Formats file size in readable format"""
     for unit in ['B', 'KB', 'MB', 'GB']:
         if size_bytes < 1024.0:
             return f"{size_bytes:.1f} {unit}"

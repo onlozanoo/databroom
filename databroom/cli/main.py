@@ -4,10 +4,10 @@ import typer
 from rich.console import Console
 from typing import Optional
 
-from .commands import clean_command, list_operations, gui_command
+from .commands import clean_command, run_command, list_operations, gui_command
 from .config import MESSAGES
 
-# Crear aplicacion principal
+# Create main application
 app = typer.Typer(
     name="databroom",
     help="[bold]DataFrame cleaning tool[/bold] with [green]code generation[/green]",
@@ -18,7 +18,7 @@ app = typer.Typer(
 
 console = Console()
 
-# Registrar comando principal
+# Register main command
 app.command(
     "clean", 
     help="[bold green]Clean DataFrame[/bold green] with specified operations and generate code",
@@ -49,6 +49,18 @@ app.command(
   \033[2m# 8. Silent comprehensive cleaning\033[0m
   \033[32mdatabroom clean\033[0m \033[36mbig_data.csv\033[0m --clean-all --quiet\033[0m \033[34m-o prod.csv\033[0m
 
+  \033[2m# 9. Save cleaning pipeline for reuse\033[0m
+  \033[32mdatabroom clean\033[0m \033[36mdata.csv\003[0m --clean-all \033[34m--pipeline-file my_pipeline.json\033[0m
+
+  \033[2m# 10. Run a saved pipeline on new data\033[0m
+  \033[32mdatabroom run\033[0m \033[36mnew_data.csv\033[0m \033[36mmy_pipeline.json\033[0m \033[34m-o cleaned_new_data.csv\033[0m
+
+\033[1;35mPIPELINE WORKFLOW:\033[0m
+  The \033[1;34m--pipeline-file\033[0m option saves the sequence of operations applied to your data
+  as a JSON file. This allows you to reproduce the exact same cleaning operations
+  on different datasets using the 'run' command. The pipeline includes all
+  applied operations with their parameters.
+
 \033[1;35mOPTIONS GROUPS:\033[0m
   \033[1;34m[INPUTS]\033[0m    - File input (csv, xlsx, json, etc.)  
   \033[1;36m[CLEANING]\033[0m  - Data cleaning operations to apply
@@ -58,23 +70,49 @@ app.command(
 """
 )(clean_command)
 
-# Registrar comando de información
+# Register run command
+app.command(
+    "run",
+    help="[bold blue]Run saved pipeline[/bold blue] on DataFrame and generate code",
+    epilog="""
+\033[1;33mEXAMPLES:\033[0m
+
+  \033[2m# Run pipeline and save results\033[0m
+  \033[32mdatabroom run\033[0m \033[36mdata.csv\033[0m \033[36mpipeline.json\033[0m \033[34m-o processed.csv\033[0m
+
+  \033[2m# Run pipeline and generate Python code\033[0m
+  \033[32mdatabroom run\033[0m \033[36mmessy.xlsx\033[0m \033[36mcleaning_pipeline.json\033[0m \033[34m-c script.py\033[0m
+
+  \033[2m# Run pipeline with verbose output\033[0m
+  \033[32mdatabroom run\033[0m \033[36mdataset.json\033[0m \033[36mpipeline.json\033[0m \033[34m-o clean.json --verbose\033[0m
+
+  \033[2m# Run pipeline and generate R code\033[0m
+  \033[32mdatabroom run\033[0m \033[36mdata.csv\033[0m \033[36mpipeline.json\033[0m \033[34m-c analysis.R -l r\033[0m
+
+\033[1;35mWORKFLOW:\033[0m
+  \033[1;34m[INPUTS]\033[0m    - Data file + Pipeline JSON file
+  \033[1;33m[BEHAVIOR]\033[0m  - Control verbosity and information display
+  \033[34m[OUTPUTS]\033[0m  - File output and code generation options
+"""
+)(run_command)
+
+# Register info command
 app.command(
     "list", 
     help="[bold blue]List all available[/bold blue] cleaning operations"
 )(list_operations)
 
-# Registrar comando GUI
+# Register GUI command
 app.command(
     "gui",
     help="[bold magenta]Launch Streamlit GUI[/bold magenta] for interactive data cleaning"
 )(gui_command)
 
-# Comando de versi�n
+# Version command
 def version_callback(value: bool):
     """[bold cyan]Show version information[/bold cyan]"""
     if value:
-        # Obtener versi�n del proyecto
+        # Get project version
         try:
             import importlib.metadata
             version = importlib.metadata.version("databroom")
@@ -86,7 +124,7 @@ def version_callback(value: bool):
         console.print("[blue]Visit:[/blue] [link]https://github.com/onlozanoo/databroom[/link]")
         raise typer.Exit()
 
-# Callback principal de la aplicaci�n
+# Main application callback
 @app.callback()
 def main(
     version: Optional[bool] = typer.Option(
@@ -123,7 +161,7 @@ def main(
     """
     pass
 
-# Entry point para pyproject.toml
+# Entry point for pyproject.toml
 def cli_main():
     """[bold]Entry point function for CLI[/bold]"""
     try:
@@ -135,6 +173,6 @@ def cli_main():
         console.print(f"Unexpected error: {e}", style="red")
         raise typer.Exit(1)
 
-# Para ejecutar directamente el m�dulo
+# To directly execute the module
 if __name__ == "__main__":
     cli_main()

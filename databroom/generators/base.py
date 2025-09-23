@@ -252,8 +252,8 @@ class CodeGenerator:
         templates_dir = Path(__file__).parent / "templates"
         env = Environment(
         loader=FileSystemLoader(str(templates_dir)),
-        trim_blocks=True,     # elimina líneas en blanco significativas
-        lstrip_blocks=True    # recorta espacios iniciales de bloques
+        trim_blocks=True,     # removes significant blank lines
+        lstrip_blocks=True    # trims leading whitespace from blocks
         )
         
         context = {

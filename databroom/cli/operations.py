@@ -9,7 +9,7 @@ from .config import CLEANING_OPERATIONS, MESSAGES
 console = Console()
 
 class OperationApplier:
-    """Maneja la aplicación dinámica de operaciones de limpieza"""
+    """Handles the dynamic application of cleaning operations"""
     
     def __init__(self, broom: Broom, verbose: bool = False):
         self.broom = broom
@@ -19,7 +19,7 @@ class OperationApplier:
     
     def apply_operations(self, operation_flags: Dict[str, bool], 
                         operation_params: Dict[str, Any]) -> List[str]:
-        """Aplica operaciones seleccionadas con sus parámetros"""
+        """Applies selected operations with their parameters"""
         
         # Filtrar operaciones habilitadas
         selected_operations = [op for op, enabled in operation_flags.items() if enabled]
@@ -65,7 +65,7 @@ class OperationApplier:
         return self.operations_applied
     
     def _apply_single_operation(self, op_name: str, operation_params: Dict[str, Any]) -> bool:
-        """Aplica una sola operación con manejo de errores"""
+        """Applies a single operation with error handling"""
         try:
             op_config = CLEANING_OPERATIONS[op_name]
             method = getattr(self.broom, op_config['method'])
@@ -87,12 +87,12 @@ class OperationApplier:
             return False
     
     def _build_method_kwargs(self, op_name: str, operation_params: Dict[str, Any]) -> Dict[str, Any]:
-        """Construye argumentos para llamada a método basado en parámetros CLI"""
+        """Builds arguments for method call based on CLI parameters"""
         op_config = CLEANING_OPERATIONS[op_name]
         method_kwargs = {}
         
         for param_name, param_info in op_config['params'].items():
-            # Buscar parámetro en diferentes formatos posibles
+            # Search parameter in different possible formats
             param_keys = [
                 f"{op_name}_{param_name}",  # remove_empty_cols_threshold
                 f"{op_name.replace('_', '-')}_{param_name}",  # remove-empty-cols_threshold
@@ -105,11 +105,11 @@ class OperationApplier:
                     param_value = operation_params[key]
                     break
             
-            # Usar valor por defecto si no se especificó
+            # Use default value if not specified
             if param_value is None and param_info['default'] is not None:
                 param_value = param_info['default']
             
-            # Agregar parámetro si tiene valor
+            # Add parameter if it has a value
             if param_value is not None:
                 method_kwargs[param_name] = self._convert_param_type(
                     param_value, param_info['type']
@@ -118,7 +118,7 @@ class OperationApplier:
         return method_kwargs
     
     def _convert_param_type(self, value: Any, target_type: type) -> Any:
-        """Convierte valor a tipo requerido"""
+        """Converts value to required type"""
         if target_type == float:
             return float(value)
         elif target_type == int:
@@ -133,7 +133,7 @@ class OperationApplier:
             return str(value)
     
     def get_summary(self) -> Dict[str, Any]:
-        """Genera resumen de cambios aplicados"""
+        """Generates summary of applied changes"""
         df_after = self.broom.get_df()
         
         return {
@@ -147,22 +147,22 @@ class OperationApplier:
         }
 
 def parse_operation_flags_and_params(cli_args: Dict[str, Any]) -> Tuple[Dict[str, bool], Dict[str, Any]]:
-    """Separa flags de operaciones de sus parámetros"""
+    """Separates operation flags from their parameters"""
     operation_flags = {}
     operation_params = {}
     
-    # Identificar operation flags
+    # Identify operation flags
     for op_name in CLEANING_OPERATIONS:
         if op_name in cli_args:
             operation_flags[op_name] = cli_args[op_name]
     
-    # Identificar parámetros de operaciones
+    # Identify operation parameters
     for key, value in cli_args.items():
         if key not in operation_flags and '_' in key:
-            # Podría ser un parámetro de operación (ej: remove_empty_cols_threshold)
+            # Could be an operation parameter (e.g., remove_empty_cols_threshold)
             operation_params[key] = value
         elif key not in CLEANING_OPERATIONS:
-            # Otros parámetros generales
+            # Other general parameters
             operation_params[key] = value
     
     return operation_flags, operation_params

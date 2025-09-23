@@ -20,118 +20,124 @@ console = Console()
 def clean_command(
     # Input
     input_file: Annotated[str, typer.Argument(help="[bold cyan]Input file path[/bold cyan] ([green]CSV, Excel, JSON[/green])")],
-    
+
     # Output Options
-    output_file: Annotated[Optional[str], typer.Option("--output-file", "-o", 
+    output_file: Annotated[Optional[str], typer.Option("--output-file", "-o",
                                                       help=r"[bold blue]\[OUTPUT][/bold blue] Output file path for cleaned data")] = None,
-    output_code: Annotated[Optional[str], typer.Option("--output-code", "-c", 
+    output_code: Annotated[Optional[str], typer.Option("--output-code", "-c",
                                                       help=r"[bold blue]\[OUTPUT][/bold blue] Output file path for generated code")] = None,
-    lang: Annotated[str, typer.Option("--lang", "-l", 
+    lang: Annotated[str, typer.Option("--lang", "-l",
                                      help=r"[bold blue]\[OUTPUT][/bold blue] Code generation language ([green]py, python, r[/green])")] = "py",
-    
-    # Behavior Options  
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", 
+    pipeline_file: Annotated[Optional[str], typer.Option("--pipeline-file",
+                                                        help=r"[bold blue]\[OUTPUT][/bold blue] Path to save the cleaning pipeline as JSON for reuse. This allows you to save the sequence of operations applied to your data, which can be loaded and executed later using the 'run' command.")] = None,
+
+
+    # Behavior Options
+    verbose: Annotated[bool, typer.Option("--verbose", "-v",
                                          help=r"[bold yellow]\[BEHAVIOR][/bold yellow] Show detailed processing information")] = False,
-    quiet: Annotated[bool, typer.Option("--quiet", "-q", 
+    quiet: Annotated[bool, typer.Option("--quiet", "-q",
                                        help=r"[bold yellow]\[BEHAVIOR][/bold yellow] Suppress non-essential output")] = False,
-    show_info: Annotated[bool, typer.Option("--info", 
+    show_info: Annotated[bool, typer.Option("--info",
                                            help=r"[bold yellow]\[BEHAVIOR][/bold yellow] Show DataFrame information before and after processing")] = False,
-    
+
     # NEW SIMPLIFIED CLEANING OPERATIONS
-    clean_all: Annotated[bool, typer.Option("--clean-all", 
+    clean_all: Annotated[bool, typer.Option("--clean-all",
                                            help=r"[bold green]\[SMART CLEAN][/bold green] Clean everything: columns + rows with all operations enabled")] = False,
-    clean_columns: Annotated[bool, typer.Option("--clean-columns", 
+    clean_columns: Annotated[bool, typer.Option("--clean-columns",
                                                help=r"[bold green]\[SMART CLEAN][/bold green] Clean column names: snake_case + remove accents + remove empty")] = False,
-    clean_rows: Annotated[bool, typer.Option("--clean-rows", 
+    clean_rows: Annotated[bool, typer.Option("--clean-rows",
                                             help=r"[bold green]\[SMART CLEAN][/bold green] Clean row data: snake_case + remove accents + remove empty")] = False,
-    
+
     # ADVANCED COLUMN OPTIONS
-    no_snakecase_cols: Annotated[bool, typer.Option("--no-snakecase-cols", 
+    no_snakecase_cols: Annotated[bool, typer.Option("--no-snakecase-cols",
                                                     help=r"[bold red]\[ADVANCED][/bold red] Disable snake_case conversion for column names")] = False,
-    no_remove_accents_cols: Annotated[bool, typer.Option("--no-remove-accents-cols", 
+    no_remove_accents_cols: Annotated[bool, typer.Option("--no-remove-accents-cols",
                                                         help=r"[bold red]\[ADVANCED][/bold red] Keep accents in column names")] = False,
-    no_remove_empty_cols: Annotated[bool, typer.Option("--no-remove-empty-cols", 
+    no_remove_empty_cols: Annotated[bool, typer.Option("--no-remove-empty-cols",
                                                       help=r"[bold red]\[ADVANCED][/bold red] Keep empty columns")] = False,
-    
-    # ADVANCED ROW OPTIONS  
-    no_clean_text: Annotated[bool, typer.Option("--no-clean-text", 
+
+    # ADVANCED ROW OPTIONS
+    no_clean_text: Annotated[bool, typer.Option("--no-clean-text",
                                                help=r"[bold red]\[ADVANCED][/bold red] Disable text cleaning in row values")] = False,
-    no_remove_accents_vals: Annotated[bool, typer.Option("--no-remove-accents-vals", 
+    no_remove_accents_vals: Annotated[bool, typer.Option("--no-remove-accents-vals",
                                                         help=r"[bold red]\[ADVANCED][/bold red] Keep accents in text values")] = False,
-    no_snakecase: Annotated[bool, typer.Option("--no-snakecase", 
+    no_snakecase: Annotated[bool, typer.Option("--no-snakecase",
                                               help=r"[bold red]\[ADVANCED][/bold red] Keep original text case and spaces (no snake_case)")] = False,
-    no_remove_empty_rows: Annotated[bool, typer.Option("--no-remove-empty-rows", 
+    no_remove_empty_rows: Annotated[bool, typer.Option("--no-remove-empty-rows",
                                                       help=r"[bold red]\[ADVANCED][/bold red] Keep empty rows")] = False,
-    
+
     # LEGACY OPERATIONS (for backward compatibility)
-    remove_empty_cols: Annotated[bool, typer.Option("--remove-empty-cols", 
+    remove_empty_cols: Annotated[bool, typer.Option("--remove-empty-cols",
                                                    help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Remove empty columns (use --clean-columns instead)")] = False,
-    remove_empty_rows: Annotated[bool, typer.Option("--remove-empty-rows", 
+    remove_empty_rows: Annotated[bool, typer.Option("--remove-empty-rows",
                                                    help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Remove empty rows (use --clean-rows instead)")] = False,
-    standardize_column_names: Annotated[bool, typer.Option("--standardize-column-names", 
+    standardize_column_names: Annotated[bool, typer.Option("--standardize-column-names",
                                                           help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: snake_case columns (use --clean-columns instead)")] = False,
-    normalize_column_names: Annotated[bool, typer.Option("--normalize-column-names", 
+    normalize_column_names: Annotated[bool, typer.Option("--normalize-column-names",
                                                         help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Remove accents from columns (use --clean-columns instead)")] = False,
-    normalize_values: Annotated[bool, typer.Option("--normalize-values", 
+    normalize_values: Annotated[bool, typer.Option("--normalize-values",
                                                   help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Remove accents from values (use --clean-rows instead)")] = False,
-    standardize_values: Annotated[bool, typer.Option("--standardize-values", 
+    standardize_values: Annotated[bool, typer.Option("--standardize-values",
                                                     help=r"[bold yellow]\[LEGACY][/bold yellow] Legacy: Clean text values (use --clean-rows instead)")] = False,
-    promote_headers: Annotated[bool, typer.Option("--promote-headers", 
+    promote_headers: Annotated[bool, typer.Option("--promote-headers",
                                                  help=r"[bold green]\[NEW][/bold green] Promote first row to become column headers and remove it")] = False,
-    
+
     # PARAMETERS
-    empty_threshold: Annotated[float, typer.Option("--empty-threshold", 
+    empty_threshold: Annotated[float, typer.Option("--empty-threshold",
                                                   help=r"[bold blue]\[PARAMS][/bold blue] Threshold for removing empty columns (0.9 = 90% missing) [dim]default: 0.9[/dim]")] = 0.9,
-    remove_empty_cols_threshold: Annotated[float, typer.Option("--remove-empty-cols-threshold", 
+    remove_empty_cols_threshold: Annotated[float, typer.Option("--remove-empty-cols-threshold",
                                                               help=r"[bold yellow]\[LEGACY PARAMS][/bold yellow] Legacy parameter (use --empty-threshold instead)")] = 0.9,
-    promote_headers_row_index: Annotated[int, typer.Option("--promote-headers-row-index", 
+    promote_headers_row_index: Annotated[int, typer.Option("--promote-headers-row-index",
                                                           help=r"[bold blue]\[PARAMS][/bold blue] Row index to promote as headers (0=first row) [dim]default: 0[/dim]")] = 0,
-    promote_headers_drop_row: Annotated[bool, typer.Option("--promote-headers-drop-row/--promote-headers-keep-row", 
+    promote_headers_drop_row: Annotated[bool, typer.Option("--promote-headers-drop-row/--promote-headers-keep-row",
                                                           help=r"[bold blue]\[PARAMS][/bold blue] Drop the promoted row after setting as headers [dim]default: drop (True)[/dim]")] = True
 ):
     """
     [bold]Clean DataFrame with smart operations and generate executable code.[/bold]
-    
+
     [green]QUICK START:[/green]
     • [blue]--clean-all[/blue]     → Does everything (recommended for most cases)
-    • [blue]--clean-columns[/blue] → Only clean column names (snake_case + remove accents + remove empty)  
+    • [blue]--clean-columns[/blue] → Only clean column names (snake_case + remove accents + remove empty)
     • [blue]--clean-rows[/blue]    → Only clean row data (snake_case + remove accents + remove empty)
-    
+
     [green]ADVANCED:[/green] Use --no-* flags to disable specific operations:
     • [red]--no-snakecase[/red]         → Keep original text case and spaces (rows)
-    • [red]--no-snakecase-cols[/red]    → Keep original column name case and spaces  
+    • [red]--no-snakecase-cols[/red]    → Keep original column name case and spaces
     • [red]--no-remove-accents-vals[/red] → Keep accents in text values
     • [red]--no-remove-empty-cols[/red]   → Keep empty columns
+
+    [green]OUTPUT:[/green] Use [blue]--output-file[/blue] to save cleaned data, [blue]--output-code[/blue]
+    to generate Python/R scripts that reproduce the cleaning pipeline, and [blue]--pipeline-file[/blue]
+    to save the cleaning pipeline as JSON for reuse.
+
     
-    [green]OUTPUT:[/green] Use [blue]--output-file[/blue] to save cleaned data and [blue]--output-code[/blue] 
-    to generate Python/R scripts that reproduce the cleaning pipeline.
-    
+
     [dim]Legacy individual operations (--remove-empty-cols, etc.) still work but --clean-* is recommended.[/dim]
     """
-    
-    # Validaciones iniciales
+
+    # Initial validations
     if not validate_input_file(input_file):
         raise typer.Exit(1)
-    
+
     if output_file and not validate_output_file(output_file):
         raise typer.Exit(1)
-    
+
     if not output_file and not output_code:
         console.print("No output specified. Use --output-file or --output-code", style="yellow")
         console.print("Processing will continue but results won't be saved.", style="dim")
-    
-    # Cargar datos
+
+    # Load data
     if verbose:
         console.print(f"Loading data from: {input_file}")
-    
+
     janitor = load_dataframe(input_file)
     if janitor is None:
         raise typer.Exit(1)
-    
-    # Mostrar info inicial si se solicita
+
+    # Show initial info if requested
     if show_info and not quiet:
         show_dataframe_info(janitor.get_df(), "Original DataFrame")
-    
+
     # Handle new smart operations first
     if clean_all or clean_columns or clean_rows:
         # Use new smart operations
@@ -142,7 +148,7 @@ def clean_command(
             if clean_rows: selected_ops.append('clean_rows')
             console.print(f"Smart operations: {selected_ops}")
             console.print(f"Parameters: empty_threshold={empty_threshold}")
-        
+
         # Apply smart operations
         if clean_all:
             janitor.clean_all()
@@ -161,9 +167,9 @@ def clean_command(
                     remove_accents=not no_remove_accents_vals,
                     snakecase=not no_snakecase
                 )
-        
+
         operations_applied = True
-        
+
     else:
         # Fallback to legacy operations
         operation_flags = {
@@ -175,70 +181,212 @@ def clean_command(
             'standardize_values': standardize_values,
             'promote_headers': promote_headers
         }
-        
+
         operation_params = {
             'remove_empty_cols_threshold': remove_empty_cols_threshold,
             'threshold': remove_empty_cols_threshold,
             'promote_headers_row_index': promote_headers_row_index,
             'promote_headers_drop_promoted_row': promote_headers_drop_row
         }
-        
+
         if verbose:
             selected_ops = [op for op, enabled in operation_flags.items() if enabled]
             console.print(f"Legacy operations: {selected_ops}")
             if operation_params:
                 console.print(f"Parameters: {operation_params}")
-        
-        # Aplicar operaciones legacy
+
+        # Apply legacy operations
         applier = OperationApplier(janitor, verbose=verbose)
         operations_applied = applier.apply_operations(operation_flags, operation_params)
-    
+
     if not operations_applied and not quiet:
         console.print(MESSAGES['no_operations'], style="yellow")
-    
+
     # Mostrar info final si se solicita
+    # Save pipeline if requested
+    if pipeline_file:
+        if verbose:
+            console.print(f"Saving pipeline to: {pipeline_file}")
+
+        success_pipeline = janitor.save_pipeline(pipeline_file)
+
+        if success_pipeline:
+            if not quiet:
+                console.print(f"Pipeline saved successfully to: {pipeline_file}", style="green")
+                if operations_applied:
+                    console.print(f"Pipeline contains {len(janitor.get_history())} operations", style="blue")
+        else:
+            console.print(f"Failed to save pipeline to: {pipeline_file}", style="red")
+            success = False
+
+    # Save results
     if show_info and not quiet:
         show_dataframe_info(janitor.get_df(), "Cleaned DataFrame")
-    
-    # Guardar resultados
+
+    # Save results
     success = True
-    
-    # Guardar datos limpios
+
+    # Save cleaned data
     if output_file:
         if not save_dataframe(janitor.get_df(), output_file):
             success = False
-    
-    # Generar y guardar código
+
+    # Generate and save code
     if output_code and operations_applied:
         if not generate_and_save_code(janitor, output_code, lang):
             success = False
-    
-    # Mostrar resumen
+
+    # Show summary
     if operations_applied and not quiet:
         if 'applier' in locals():
             summary = applier.get_summary()
             show_processing_summary(summary)
         else:
             console.print("Operations completed successfully", style="green")
-    
-    # Mensaje final
+
+    # Final message
     if not quiet:
         if success and (output_file or output_code):
             console.print(MESSAGES['success'], style="green bold")
         elif operations_applied:
             console.print("Processing completed (no output files specified)", style="green")
-    
+
     # Exit code
     raise typer.Exit(0 if success else 1)
 
-# Comando adicional para mostrar operaciones disponibles
+def run_command(
+    # Input
+    input_file: Annotated[str, typer.Argument(help="[bold cyan]Input file path[/bold cyan] ([green]CSV, Excel, JSON[/green])")],
+    pipeline_file: Annotated[str, typer.Argument(help="[bold cyan]Pipeline JSON file path[/bold cyan]")],
+
+    # Output Options
+    output_file: Annotated[Optional[str], typer.Option("--output-file", "-o",
+                                                      help=r"[bold blue]\[OUTPUT][/bold blue] Output file path for processed data")] = None,
+    output_code: Annotated[Optional[str], typer.Option("--output-code", "-c",
+                                                      help=r"[bold blue]\[OUTPUT][/bold blue] Output file path for generated code")] = None,
+    lang: Annotated[str, typer.Option("--lang", "-l",
+                                     help=r"[bold blue]\[OUTPUT][/bold blue] Code generation language ([green]py, python, r[/green])")] = "py",
+
+    # Behavior Options
+    verbose: Annotated[bool, typer.Option("--verbose", "-v",
+                                         help=r"[bold yellow]\[BEHAVIOR][/bold yellow] Show detailed processing information")] = False,
+    quiet: Annotated[bool, typer.Option("--quiet", "-q",
+                                       help=r"[bold yellow]\[BEHAVIOR][/bold yellow] Suppress non-essential output")] = False,
+    show_info: Annotated[bool, typer.Option("--info",
+                                           help=r"[bold yellow]\[BEHAVIOR][/bold yellow] Show DataFrame information before and after processing")] = False
+):
+    """
+    [bold]Run a saved cleaning pipeline on DataFrame and generate executable code.[/bold]
+
+    Load a previously saved pipeline JSON file and apply all operations to the input data.
+    This allows you to reproduce cleaning workflows consistently across different datasets.
+
+    [green]USAGE:[/green]
+    • Load input data and pipeline, then apply all operations in sequence
+    • Generate code that reproduces the exact cleaning pipeline
+    • Save the processed data to various formats
+
+    [green]OUTPUT:[/green] Use [blue]--output-file[/blue] to save processed data and [blue]--output-code[/blue]
+    to generate Python/R scripts that reproduce the pipeline.
+
+    [dim]The pipeline file should be a JSON file saved from a previous cleaning session.[/dim]
+    """
+    
+    # Initial validations
+    if not validate_input_file(input_file):
+        raise typer.Exit(1)
+
+    # Validate pipeline file
+    if not validate_input_file(pipeline_file):
+        raise typer.Exit(1)
+
+    if output_file and not validate_output_file(output_file):
+        raise typer.Exit(1)
+
+    if not output_file and not output_code:
+        console.print("No output specified. Use --output-file or --output-code", style="yellow")
+        console.print("Processing will continue but results won't be saved.", style="dim")
+
+    # Load data
+    if verbose:
+        console.print(f"Loading data from: {input_file}")
+
+    janitor = load_dataframe(input_file)
+    if janitor is None:
+        raise typer.Exit(1)
+
+    # Show initial info if requested
+    if show_info and not quiet:
+        show_dataframe_info(janitor.get_df(), "Original DataFrame")
+
+    # Load and execute pipeline
+    if verbose:
+        console.print(f"Loading pipeline from: {pipeline_file}")
+
+    try:
+        # Load pipeline
+        loaded_history = janitor.load_pipeline(pipeline_file)
+        if not loaded_history:
+            console.print(f"Failed to load pipeline from: {pipeline_file}", style="red")
+            raise typer.Exit(1)
+
+        if verbose:
+            console.print(f"Loaded pipeline with {len(loaded_history)} operations")
+
+        # Execute pipeline
+        if verbose:
+            console.print("Executing pipeline operations...")
+
+        janitor.pipeline.run_pipeline(pipeline_file, loaded_history)
+
+        operations_applied = len(loaded_history) > 0
+
+    except Exception as e:
+        console.print(f"Error executing pipeline: {e}", style="red")
+        raise typer.Exit(1)
+
+    if not operations_applied and not quiet:
+        console.print("No operations found in pipeline", style="yellow")
+
+    # Mostrar info final si se solicita
+    if show_info and not quiet:
+        show_dataframe_info(janitor.get_df(), "Processed DataFrame")
+
+    # Save results
+    success = True
+
+    # Guardar datos procesados
+    if output_file:
+        if not save_dataframe(janitor.get_df(), output_file):
+            success = False
+
+    # Generate and save code
+    if output_code and operations_applied:
+        if not generate_and_save_code(janitor, output_code, lang):
+            success = False
+
+    # Show summary
+    if operations_applied and not quiet:
+        console.print(f"Pipeline executed successfully with {len(loaded_history)} operations", style="green")
+
+    # Final message
+    if not quiet:
+        if success and (output_file or output_code):
+            console.print(MESSAGES['success'], style="green bold")
+        elif operations_applied:
+            console.print("Processing completed (no output files specified)", style="green")
+
+    # Exit code
+
+
+# Additional command to show available operations
 def list_operations():
     """[bold green]List all available cleaning operations grouped by category[/bold green]"""
     from rich.table import Table
     from rich.panel import Panel
     from rich.columns import Columns
     
-    # Tabla principal de operaciones
+    # Main operations table
     operations_table = Table(title="[bold magenta]Available Cleaning Operations[/bold magenta]", show_header=True)
     operations_table.add_column("[bold]Operation[/bold]", style="cyan", no_wrap=True)
     operations_table.add_column("[bold]CLI Flag[/bold]", style="green")
@@ -256,7 +404,7 @@ def list_operations():
             op_config['help']
         )
     
-    # Tablas por grupos
+    # Tables by groups
     output_options = Table(title=r"[bold blue]\[OUTPUT] Options[/bold blue]", show_header=True, border_style="blue")
     output_options.add_column("[bold]Flag[/bold]", style="green")
     output_options.add_column("[bold]Description[/bold]", style="white")
@@ -276,7 +424,7 @@ def list_operations():
     params_options.add_column("[bold]Description[/bold]", style="white")
     params_options.add_row("[green]--remove-empty-cols-threshold[/green]", "Threshold for column removal ([dim]0.0-1.0[/dim])")
     
-    # Mostrar todo
+    # Show all
     console.print(operations_table)
     console.print("\n")
     
@@ -299,7 +447,7 @@ def list_operations():
     console.print()
     console.print("[bold green]Tip:[/bold green] Use [yellow]--help[/yellow] on any command for detailed examples and documentation!")
 
-# Función para testing y debugging
+# Function for testing and debugging
 def show_available_operations():
     """Debug function to show loaded operations"""
     console.print("Loaded Operations:")
@@ -362,12 +510,12 @@ def gui_command(
     import os
     from pathlib import Path
     
-    # Configurar puerto
+    # Configure port
     server_port = port or 8501
     
     console.print("[bold magenta]Launching Databroom GUI...[/bold magenta]")
     
-    # Encontrar la ruta del archivo GUI
+    # Find the GUI file path
     try:
         # Buscar el archivo de la GUI
         gui_path = Path(__file__).parent.parent / "gui" / "app.py"
@@ -386,7 +534,7 @@ def gui_command(
         console.print(f"[yellow]URL:[/yellow] [link]http://localhost:{server_port}[/link]")
         console.print("[yellow]Tip:[/yellow] Use [bold]Ctrl+C[/bold] to stop the GUI server\n")
         
-        # Configurar argumentos de streamlit
+        # Configure Streamlit arguments
         streamlit_args = [
             sys.executable, "-m", "streamlit", "run", str(gui_path),
             "--server.port", str(server_port),
@@ -395,14 +543,14 @@ def gui_command(
             "--browser.gatherUsageStats", "false"
         ]
         
-        # Ejecutar streamlit
+        # Execute Streamlit
         try:
             if verbose:
                 console.print("[dim]Streamlit command:[/dim]")
                 console.print("[dim]" + " ".join(streamlit_args) + "[/dim]\n")
                 subprocess.run(streamlit_args, check=True)
             else:
-                # Redirigir stdout si no es verbose para output limpio
+                # Redirect stdout if not verbose for clean output
                 with open(os.devnull, 'w') as devnull:
                     subprocess.run(streamlit_args, check=True, stdout=devnull, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as e:
@@ -421,5 +569,5 @@ def gui_command(
         raise typer.Exit(1)
 
 if __name__ == "__main__":
-    # Para testing directo
+    # For direct testing
     list_operations()

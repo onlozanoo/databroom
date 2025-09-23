@@ -5,22 +5,22 @@ from typing import Dict, List, Any, Union
 from databroom.core import cleaning_ops
 from databroom.core.broom import Broom
 
-# Obtener funciones disponibles dinámicamente (igual que pipeline.py)
+# Dynamically get available functions (same as pipeline.py)
 available_functions = [name for name, obj in inspect.getmembers(cleaning_ops, inspect.isfunction)]
 
-# Obtener métodos de Broom que correspondan a funciones de cleaning_ops
+# Get Broom methods that correspond to cleaning_ops functions
 Broom_methods = [name for name in dir(Broom) 
                    if not name.startswith('_') 
                    and callable(getattr(Broom, name))
                    and name in available_functions]
 
 def extract_function_params(func) -> Dict[str, Any]:
-    """Extrae parámetros de una función con sus tipos y valores por defecto"""
+    """Extracts function parameters with their types and default values"""
     sig = inspect.signature(func)
     params = {}
     
     for param_name, param in sig.parameters.items():
-        if param_name == 'df':  # Saltar el parámetro DataFrame
+        if param_name == 'df':  # Skip the DataFrame parameter
             continue
             
         param_info = {
@@ -34,12 +34,12 @@ def extract_function_params(func) -> Dict[str, Any]:
     return params
 
 def extract_docstring_summary(func) -> str:
-    """Extrae el primer línea del docstring como help text"""
+    """Extracts the first line of the docstring as help text"""
     if func.__doc__:
         return func.__doc__.split('\n')[0].strip().rstrip('.')
     return f"Apply {func.__name__} operation"
 
-# Mapeo automático de operaciones con introspección completa
+# Automatic operation mapping with full introspection
 CLEANING_OPERATIONS = {}
 for method_name in Broom_methods:
     # Obtener función correspondiente en cleaning_ops
@@ -53,12 +53,12 @@ for method_name in Broom_methods:
         'cli_flag': method_name.replace('_', '-')  # remove_empty_cols -> remove-empty-cols
     }
 
-# Configuraciones del CLI
+# CLI configurations
 SUPPORTED_LANGUAGES = ['py', 'python', 'r']
 SUPPORTED_INPUT_FORMATS = ['.csv', '.xlsx', '.xls', '.json']
 SUPPORTED_OUTPUT_FORMATS = ['.csv', '.xlsx', '.json']
 
-# Mapeo de extensiones a tipos
+# Mapping extensions to types
 FILE_TYPE_MAPPING = {
     '.csv': 'csv',
     '.xlsx': 'excel', 
@@ -66,13 +66,13 @@ FILE_TYPE_MAPPING = {
     '.json': 'json'
 }
 
-# Configuración de Rich console
+# Rich console configuration
 CONSOLE_CONFIG = {
     'force_terminal': True,
     'width': 120
 }
 
-# Mensajes del CLI
+# CLI messages
 MESSAGES = {
     'file_not_found': "Input file not found: {path}",
     'invalid_format': "Unsupported file format: {ext}. Supported: {formats}",
