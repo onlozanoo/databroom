@@ -183,6 +183,10 @@ databroom gui
 ### GUI Screenshots
 
 
+<!-- Animated GIF -->
+
+![Animated preview of Databroom GUI showing data upload, cleaning operations, and code export](assets/gui_demo.gif)
+
 <!-- Current Data -->
 <p align="center">
 <img src="assets/gui_current_data.png" width="800"
@@ -206,7 +210,6 @@ databroom gui
 <img src="assets/gui_code.png" width="800"
      alt="Databroom GUI in the Export Code tab showing auto-generated Python pandas code for the performed cleaning operations">
 </p>
-
 
 ### Programmatic API
 
