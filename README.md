@@ -18,7 +18,6 @@
   - [🆚 Why Databroom?](#-why-databroom)
     - [**The Problem: Manual Data Cleaning is Tedious**](#the-problem-manual-data-cleaning-is-tedious)
     - [**The Benefits**](#the-benefits)
-    - [**Real-world Comparison**](#real-world-comparison)
     - [**When to Use Databroom**](#when-to-use-databroom)
   - [🚀 Quick Start](#-quick-start)
     - [Installation](#installation)
@@ -55,61 +54,6 @@
 ### **The Problem: Manual Data Cleaning is Tedious**
 
 **With pandas (manual approach):**
-```python
-import pandas as pd
-import unicodedata
-
-# Read the file
-df = pd.read_csv("messy_data.csv")
-
-# Remove columns with more than 90% missing values
-threshold = 0.9
-df = df.loc[:, df.isnull().mean() < threshold]
-
-# Standardize column names manually
-df.columns = df.columns.str.lower().str.replace(' ', '_')
-
-# Normalize text values (removing accents)
-def normalize_text(text):
-    if not isinstance(text, str):
-        return text
-    return ''.join(
-        c for c in unicodedata.normalize('NFKD', text)
-        if not unicodedata.combining(c)
-    )
-
-# Apply to all string columns (need to identify them first)
-string_cols = df.select_dtypes(include=['object']).columns
-for col in string_cols:
-    df[col] = df[col].apply(normalize_text)
-
-# Save the result
-df.to_csv("clean_data.csv", index=False)
-```
-
-**With Databroom (one command):**
-```bash
-databroom clean messy_data.csv \
-  --clean-all \
-  --output-file clean_data.csv \
-  --output-code cleaning_script.py
-```
-
-### **The Benefits**
-
-| Feature | Manual Pandas | Databroom |
-|---------|---------------|-----------|
-| **Lines of code** | ~20+ lines | 1 command |
-| **Time to implement** | 10-15 minutes | 10 seconds |
-| **Error prone** | High (manual logic) | Low (tested operations) |
-| **Reproducible** | Need to save script | Auto-generates code |
-| **Cross-language** | Python only | Python + R output |
-| **GUI option** | No | Yes (`databroom gui`) |
-| **Parameter tuning** | Manual coding | CLI flags & GUI sliders |
-
-### **Real-world Comparison**
-
-**Complex cleaning task:**
 ```python
 # Pandas approach: ~50 lines of code
 import pandas as pd
@@ -157,6 +101,17 @@ databroom clean survey_data.xlsx \
 ```
 
 **Result:** Same output, 1 command, includes reproducible script generation.
+### **The Benefits**
+
+| Feature | Manual Pandas | Databroom |
+|---------|---------------|-----------|
+| **Lines of code** | ~20+ lines | 1 command |
+| **Time to implement** | 10-15 minutes | 10 seconds |
+| **Error prone** | High (manual logic) | Low (tested operations) |
+| **Reproducible** | Need to save script | Auto-generates code |
+| **Cross-language** | Python only | Python + R output |
+| **GUI option** | No | Yes (`databroom gui`) |
+| **Parameter tuning** | Manual coding | CLI flags & GUI sliders |
 
 ### **When to Use Databroom**
 
@@ -225,12 +180,33 @@ databroom gui
 # Opens http://localhost:8501 in your browser
 ```
 
-<!-- GUI SCREENSHOTS SECTION - PLACEHOLDER -->
 ### GUI Screenshots
 
-*[GUI screenshots will be added here to showcase the interactive interface, file upload, operation panels, live preview, and code generation features]*
 
-<!-- END GUI SCREENSHOTS SECTION -->
+<!-- Current Data -->
+<p align="center">
+<img src="assets/gui_current_data.png" width="800"
+     alt="Databroom GUI showing the Current Data tab with a preview of the loaded DataFrame, memory usage, and missing values summary">
+</p>
+
+<!-- History & Pipeline -->
+<p align="center">
+<img src="assets/gui_history.png" width="800"
+     alt="Databroom GUI displaying the History & Pipeline tab to view past cleaning steps and save or run a cleaning pipeline">
+</p>
+
+<!-- Data Info -->
+<p align="center">
+<img src="assets/gui_data_info.png" width="800"
+     alt="Databroom GUI presenting the Data Info tab with column types, non-null counts, and sample values">
+</p>
+
+<!-- Export Code -->
+<p align="center">
+<img src="assets/gui_code.png" width="800"
+     alt="Databroom GUI in the Export Code tab showing auto-generated Python pandas code for the performed cleaning operations">
+</p>
+
 
 ### Programmatic API
 
@@ -278,18 +254,21 @@ generator.export_code('my_cleaning_pipeline.py')
 - **Real-time code generation** with syntax highlighting
 - **One-click download** of cleaned data and generated scripts
 - **Operation history** with undo functionality
+- **Pipeline management**: save current cleaning pipelines to JSON and re-upload them to reproduce or continue work
 
 ### **⚙️ Programmatic API**
 - **Chainable methods** for fluent data cleaning workflows
 - **Factory methods** for easy file loading (`from_csv()`, `from_excel()`, etc.)
 - **History tracking** for reproducible operations
 - **Template-based code generation** with Jinja2
+- **Pipeline I/O**: export and load pipelines directly from Python for automated cleaning sessions
 
 ### **🔄 Code Generation**
 - **Complete scripts** with imports, file loading, and execution
 - **Cross-language support** (Python/pandas ↔ R/tidyverse)
 - **Template system** for customizable output formats
 - **Reproducible workflows** that can be shared and version controlled
+
 
 ---
 
@@ -462,7 +441,7 @@ mypy databroom/
 
 ## 📈 Project Status
 
-**Current Version**: v0.3.1 - **Production Ready & Live on PyPI**
+**Current Version**: v0.4 - **Save, load and run pipelines**
 
 ✅ **Fully Implemented**
 - **Smart Operations**: `--clean-all`, `--clean-columns`, `--clean-rows`, `--promote-headers`
@@ -472,6 +451,7 @@ mypy databroom/
 - Programmatic API with method chaining
 - Python and R code generation with parameter filtering
 - Comprehensive test suite
+- Save/load cleaning pipelines as JSON
 - **Live on PyPI**: `pip install databroom`
 - Dynamic new operations loading system
 - Extensible component-based GUI structure
@@ -486,7 +466,6 @@ mypy databroom/
 - Preview in CLI
 - Configuration presets and templates
 - Enhanced batch processing workflows
-- Save/load cleaning pipelines as JSON
 - Custom cleaning operation plugins system
 - Integration with pandas-profiling and data validation tools
 - Advanced data quality reporting and metrics

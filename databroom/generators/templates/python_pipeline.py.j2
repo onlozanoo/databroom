@@ -7,7 +7,7 @@ import pandas as pd
 from databroom import Broom
 
 # Load your dataset using Databroom
-df = Broom.from_csv("{{ filename or 'your_data_file.csv' }}")
+df = Broom.from_file("{{ filename or 'your_data_file.csv' }}")
 print(f"Original shape: {df.get_df().shape}")
 
 # Apply cleaning operations

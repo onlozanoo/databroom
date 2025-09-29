@@ -13,7 +13,7 @@ from databroom.generators.base import CodeGenerator
 
 def render_data_tabs():
     """Render all data display tabs."""
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Current Data", "📝 History", "🔍 Data Info", "💾 Export Code"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Current Data", "📝 History & Pipeline", "🔍 Data Info", "💾 Export Code"])
     
     # Track tab interactions
     if st.session_state.get('current_tab') != tab1:
