@@ -444,7 +444,15 @@ mypy databroom/
 
 ## 📈 Project Status
 
-**Current Version**: v0.4 - **Save, load and run pipelines**
+Current Version: v0.4 – Portable Pipelines Across GUI, CLI, and API
+Design a cleaning pipeline once — apply it anywhere.
+
+- Create a cleaning workflow visually in the GUI
+- Export it as a JSON pipeline
+- Run it headlessly via CLI or integrate into scripts and APIs
+- Re-import it to GUI for review or extension
+
+This update makes your data prep workflows reusable, versionable, and automatable across any environment — without code duplication or switching tools.
 
 ✅ **Fully Implemented**
 - **Smart Operations**: `--clean-all`, `--clean-columns`, `--clean-rows`, `--promote-headers`
@@ -502,3 +510,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Issues & Support**: https://github.com/onlozanoo/databroom/issues
 
 *Built with ❤️ for the data science community*
+
