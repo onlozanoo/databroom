@@ -183,8 +183,8 @@ def _render_history_tab():
     # Current cleaning history
     st.subheader("Current Session History")
     if st.session_state.cleaning_history:
-        for i, operation in enumerate(st.session_state.cleaning_history, 1):
-            st.write(f"{i}. {operation}")
+        for operation in st.session_state.cleaning_history:
+            st.markdown(f"- {operation}")
 
         # Show technical history from broom
         with st.expander("Technical Details"):

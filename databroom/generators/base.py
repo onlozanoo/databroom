@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import re
 import sys
 from pathlib import Path
 import ast
@@ -56,8 +57,28 @@ class CodeGenerator:
             'promote_headers': {
                 'row_index': 0,
                 'drop_promoted_row': True
-            }
+            },
+            'rename_column': {},
+            'reorder_columns': {},
+            'drop_columns': {},
+            'keep_columns': {}
         }
+
+    def _format_r_identifier(self, name: str) -> str:
+        """Format column names for safe use in tidyverse verbs."""
+        if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name or ""):
+            return name
+        escaped = (name or "").replace("`", "``")
+        return f"`{escaped}`"
+
+    def _format_r_string(self, value: str) -> str:
+        """Quote a string for R code."""
+        escaped = (value or "").replace('"', '\\"')
+        return f"\"{escaped}\""
+
+    def _format_r_string_vector(self, items):
+        quoted = ", ".join(self._format_r_string(item) for item in items)
+        return f"c({quoted})"
         
     def _load_templates(self):
         """
@@ -75,6 +96,14 @@ class CodeGenerator:
         templates = templates[1:]
         
         return templates, templates_path
+
+    def _freeze_value(self, value):
+        """Convert nested structures into hashable tuples for duplicate checks."""
+        if isinstance(value, dict):
+            return tuple(sorted((key, self._freeze_value(val)) for key, val in value.items()))
+        if isinstance(value, (list, tuple)):
+            return tuple(self._freeze_value(item) for item in value)
+        return value
     
     def load_history(self, history):
         
@@ -87,9 +116,32 @@ class CodeGenerator:
         
         # Filter the history to include only code snippets
         
-        history_funcs = [snippet['function'] for snippet in history]
-        history_params = [snippet['kwargs'] for snippet in history]
-        self.history = list(zip(history_funcs, history_params))
+        deduplicated_history = []
+        seen_signatures = set()
+
+        for snippet in history:
+            func_name = snippet.get('function')
+            if not func_name:
+                continue
+
+            kwargs = dict(snippet.get('kwargs') or {})
+            args = snippet.get('args') or ()
+            if not isinstance(args, (list, tuple)):
+                args = (args,)
+
+            signature = (
+                func_name,
+                self._freeze_value(tuple(args)),
+                self._freeze_value(kwargs),
+            )
+
+            if signature in seen_signatures:
+                continue
+
+            deduplicated_history.append((func_name, kwargs))
+            seen_signatures.add(signature)
+
+        self.history = deduplicated_history
         
         return self.history
      
@@ -236,6 +288,34 @@ class CodeGenerator:
                 r_row_num = row_index + 1  # R is 1-indexed
                 remove_str = "TRUE" if drop_promoted_row else "FALSE"
                 return f"row_to_names(row_number = {r_row_num}, remove_row = {remove_str})"
+        
+        elif func_name == 'rename_column':
+            old_name = params.get('old')
+            new_name = params.get('new')
+            if old_name is None or new_name is None:
+                return "# rename_column requires 'old' and 'new' parameters"
+            return f"rename({self._format_r_identifier(new_name)} = {self._format_r_identifier(old_name)})"
+
+        elif func_name == 'reorder_columns':
+            columns = params.get('columns') or []
+            if not columns:
+                return "# reorder_columns requires a non-empty column list"
+            ordered = ", ".join(self._format_r_identifier(col) for col in columns)
+            return f"select({ordered}, everything())"
+
+        elif func_name == 'drop_columns':
+            columns = params.get('columns') or []
+            if not columns:
+                return "# drop_columns requires a non-empty column list"
+            vector = self._format_r_string_vector(columns)
+            return f"select(-all_of({vector}))"
+
+        elif func_name == 'keep_columns':
+            columns = params.get('columns') or []
+            if not columns:
+                return "# keep_columns requires a non-empty column list"
+            vector = self._format_r_string_vector(columns)
+            return f"select(all_of({vector}))"
         
         else:
             # For unknown operations, add a comment

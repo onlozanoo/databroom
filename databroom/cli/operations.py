@@ -1,6 +1,6 @@
 # databroom/cli/operations.py
 
-from typing import Dict, List, Any, Tuple
+from typing import Any, Dict, List, Tuple, get_origin
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from databroom.core.broom import Broom
@@ -82,8 +82,7 @@ class OperationApplier:
             return True
             
         except Exception as e:
-            if self.verbose:
-                console.print(f"Error in {op_name}: {str(e)}", style="red")
+            console.print(f"Error in {op_name}: {str(e)}", style="red")
             return False
     
     def _build_method_kwargs(self, op_name: str, operation_params: Dict[str, Any]) -> Dict[str, Any]:
@@ -109,6 +108,9 @@ class OperationApplier:
             if param_value is None and param_info['default'] is not None:
                 param_value = param_info['default']
             
+            if param_value is None and param_info.get('required'):
+                raise ValueError(f"Missing required parameter '{param_name}' for operation '{op_name}'")
+            
             # Add parameter if it has a value
             if param_value is not None:
                 method_kwargs[param_name] = self._convert_param_type(
@@ -119,15 +121,18 @@ class OperationApplier:
     
     def _convert_param_type(self, value: Any, target_type: type) -> Any:
         """Converts value to required type"""
+        origin = get_origin(target_type)
         if target_type == float:
             return float(value)
         elif target_type == int:
             return int(value)
         elif target_type == bool:
             return bool(value)
-        elif target_type == list:
+        elif target_type == list or origin == list:
             if isinstance(value, str):
-                return value.split(',')
+                return [item.strip() for item in value.split(',') if item.strip()]
+            if isinstance(value, (tuple, set)):
+                return [str(item) for item in value]
             return value
         else:
             return str(value)

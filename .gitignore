@@ -25,3 +25,6 @@ generated*.py
 README_PYPI.md
 venv/
 *.swp
+AGENTS.md
+.claude
+.gitignore

@@ -38,7 +38,7 @@ def _render_quick_access():
 
                 debug_log(f"After operation - Shape: {st.session_state.broom.get_df().shape}", "GUI")
                 sync_history()
-                st.session_state.cleaning_history.append("GUI: Applied complete cleaning (clean_all)")
+                st.session_state.cleaning_history.append("Applied full clean on columns and rows")
                 debug_log(f"Synced history - Total operations: {len(st.session_state.cleaning_history)}", "GUI")
                 st.success("🧹 Complete cleaning applied!")
                 st.session_state['confirm_clean_all'] = False
@@ -63,69 +63,268 @@ def _render_structure_operations():
         st.caption("Fix data structure and format issues")
         
         _render_promote_headers()
+        _render_rename_column()
+        _render_reorder_columns()
+        _render_drop_columns()
+        _render_keep_columns()
 
 def _render_promote_headers():
     """Render promote headers operation."""
-    col1, col2 = st.columns([3, 1])
-    
-    with col1:
+    with st.expander("📌 Promote Headers", expanded=False):
+        df = st.session_state.broom.get_df()
+        if df.empty:
+            st.info("Load data before promoting headers.")
+            return
+
+        max_rows = len(df) - 1
+        default_row = st.session_state.get('promote_headers_row_index', 0)
+        default_row = min(max(default_row, 0), max_rows)
+
+        row_index = st.number_input(
+            "Row index to promote (0 = first row)",
+            min_value=0,
+            max_value=max_rows,
+            value=default_row,
+            help="Select which row will become the new header row",
+            key="promote_headers_row_index_input",
+        )
+        st.session_state['promote_headers_row_index'] = row_index
+
+        drop_row = st.checkbox(
+            "Remove promoted row after setting as headers",
+            value=st.session_state.get('promote_headers_drop_row', True),
+            help="Uncheck if you want to keep the original row in the dataset",
+            key="promote_headers_drop_row_checkbox",
+        )
+        st.session_state['promote_headers_drop_row'] = drop_row
+
         if st.button(
-            "📌 Promote Headers",
-            help="Convert a data row to column headers",
+            "Apply Promote Headers",
             use_container_width=True,
-            key="promote_headers_btn"
+            key="promote_headers_apply_btn"
         ):
-            debug_log("Promote Headers clicked", "GUI")
+            debug_log("Promote Headers confirmed", "GUI")
             st.session_state.last_interaction = 'promote_headers'
-            
-            # Check if promote_headers method exists (defensive programming)
+
             if not hasattr(st.session_state.broom, 'promote_headers'):
                 st.error("🔄 Please refresh the page - the promote_headers operation requires a page reload.")
                 st.info("💡 Tip: Press F5 or refresh your browser to reload the latest code.")
                 return
-            
-            # Get parameters from session state
-            row_index = st.session_state.get('promote_headers_row_index', 0)
-            drop_row = st.session_state.get('promote_headers_drop_row', True)
-            
-            # Validate row_index
-            max_rows = len(st.session_state.broom.get_df())
-            if row_index >= max_rows:
-                st.error(f"❌ Row index {row_index} is out of range. Maximum row index is {max_rows - 1}")
-                return
-            
-            debug_log(f"Before operation - Columns: {list(st.session_state.broom.get_df().columns)}", "GUI")
+
+            debug_log(f"Before operation - Columns: {list(df.columns)}", "GUI")
             st.session_state.broom.promote_headers(
-                row_index=row_index,
-                drop_promoted_row=drop_row
+                row_index=int(row_index),
+                drop_promoted_row=bool(drop_row)
             )
             debug_log(f"After operation - Columns: {list(st.session_state.broom.get_df().columns)}", "GUI")
             sync_history()
-            st.session_state.cleaning_history.append(f"GUI: Promoted row {row_index} to headers (promote_headers)")
-            debug_log(f"Synced history - Total operations: {len(st.session_state.cleaning_history)}", "GUI")
-            st.success(f"📌 Row {row_index} promoted to headers!")
+            st.session_state.cleaning_history.append(f"Promoted row {int(row_index)} to column headers")
+            st.success(f"📌 Row {int(row_index)} promoted to headers!")
             st.rerun()
-    
-    with col2:
-        if st.button("⚙️", help="Configure promote headers options", key="config_promote_headers"):
-            st.session_state['show_promote_headers_config'] = not st.session_state.get('show_promote_headers_config', False)
+
+def _render_rename_column():
+    """Render rename column operation."""
+    df = st.session_state.broom.get_df()
+    columns = list(df.columns)
+
+    with st.expander("✏️ Rename Column", expanded=False):
+        if not columns:
+            st.info("Load data to enable column rename.")
+            return
+
+        default_old = st.session_state.get('rename_column_old', columns[0])
+        if default_old not in columns:
+            default_old = columns[0]
+
+        old = st.selectbox(
+            "Column to rename",
+            options=columns,
+            index=columns.index(default_old),
+            key="rename_column_old_select"
+        )
+        st.session_state['rename_column_old'] = old
+
+        new_value = st.text_input(
+            "New column name",
+            value=st.session_state.get('rename_column_new', ""),
+            help="Provide a unique name for the column",
+            key="rename_column_new_input"
+        ).strip()
+        st.session_state['rename_column_new'] = new_value
+
+        if st.button(
+            "Apply Rename",
+            use_container_width=True,
+            key="rename_column_apply_btn"
+        ):
+            debug_log("Rename Column confirmed", "GUI")
+            st.session_state.last_interaction = 'rename_column'
+
+            if not new_value:
+                st.error("❌ Provide a new column name.")
+                return
+
+            try:
+                st.session_state.broom.rename_column(old=old, new=new_value)
+            except ValueError as exc:
+                st.error(f"❌ {exc}")
+                return
+
+            sync_history()
+            st.session_state.cleaning_history.append(f"Renamed column '{old}' to '{new_value}'")
+            st.success(f"✏️ Column '{old}' renamed to '{new_value}'")
             st.rerun()
-    
-    # Configuration for promote headers
-    if st.session_state.get('show_promote_headers_config', False):
-        st.markdown("**Promote Headers Configuration:**")
-        st.session_state['promote_headers_row_index'] = st.number_input(
-            "Row index to promote (0 = first row)", 
-            min_value=0, 
-            max_value=max(0, len(st.session_state.broom.get_df()) - 1),
-            value=st.session_state.get('promote_headers_row_index', 0),
-            help="Which row to use as column headers"
+
+def _render_reorder_columns():
+    """Render reorder columns operation."""
+    df = st.session_state.broom.get_df()
+    columns = list(df.columns)
+
+    with st.expander("🔀 Reorder Columns", expanded=False):
+        if not columns:
+            st.info("Load data to reorder columns.")
+            return
+
+        preset = [
+            col for col in st.session_state.get('reorder_columns_selection', columns)
+            if col in columns
+        ]
+        if not preset:
+            preset = columns
+
+        selection = st.multiselect(
+            "Select columns in the desired leading order",
+            options=columns,
+            default=preset,
+            help="Choose the columns that should appear first; other columns keep their relative order",
+            key="reorder_columns_multiselect"
         )
-        st.session_state['promote_headers_drop_row'] = st.checkbox(
-            "Remove promoted row after setting as headers", 
-            value=st.session_state.get('promote_headers_drop_row', True),
-            help="Delete the row after promoting it to headers"
+        st.session_state['reorder_columns_selection'] = selection
+
+        if st.button(
+            "Apply Reorder",
+            use_container_width=True,
+            key="reorder_columns_apply_btn"
+        ):
+            debug_log("Reorder Columns confirmed", "GUI")
+            st.session_state.last_interaction = 'reorder_columns'
+
+            if not selection:
+                st.error("❌ Select at least one column to reorder.")
+                return
+
+            try:
+                st.session_state.broom.reorder_columns(columns=selection)
+            except ValueError as exc:
+                st.error(f"❌ {exc}")
+                return
+
+            sync_history()
+            if selection:
+                lead = ", ".join(selection)
+                st.session_state.cleaning_history.append(f"Reordered columns; moved {lead} to the front")
+            else:
+                st.session_state.cleaning_history.append("Reordered columns")
+            st.success("🔀 Columns reordered")
+            st.rerun()
+
+def _render_drop_columns():
+    """Render drop columns operation."""
+    df = st.session_state.broom.get_df()
+    columns = list(df.columns)
+
+    with st.expander("🗑️ Drop Columns", expanded=False):
+        if not columns:
+            st.info("Load data to drop columns.")
+            return
+
+        preset = [
+            col for col in st.session_state.get('drop_columns_selection', [])
+            if col in columns
+        ]
+
+        selection = st.multiselect(
+            "Columns to drop",
+            options=columns,
+            default=preset,
+            help="Choose the columns that should be removed from the dataset",
+            key="drop_columns_multiselect"
         )
+        st.session_state['drop_columns_selection'] = selection
+
+        if st.button(
+            "Apply Drop Columns",
+            use_container_width=True,
+            key="drop_columns_apply_btn"
+        ):
+            debug_log("Drop Columns confirmed", "GUI")
+            st.session_state.last_interaction = 'drop_columns'
+
+            if not selection:
+                st.error("❌ Select at least one column to drop.")
+                return
+
+            try:
+                st.session_state.broom.drop_columns(columns=selection)
+            except ValueError as exc:
+                st.error(f"❌ {exc}")
+                return
+
+            sync_history()
+            joined = ", ".join(selection)
+            st.session_state.cleaning_history.append(f"Dropped columns {joined}")
+            st.success(f"🗑️ Dropped columns: {joined}")
+            st.rerun()
+
+def _render_keep_columns():
+    """Render keep columns operation."""
+    df = st.session_state.broom.get_df()
+    columns = list(df.columns)
+
+    with st.expander("📌 Keep Columns", expanded=False):
+        if not columns:
+            st.info("Load data to select columns to keep.")
+            return
+
+        preset = [
+            col for col in st.session_state.get('keep_columns_selection', columns)
+            if col in columns
+        ]
+        if not preset:
+            preset = columns
+
+        selection = st.multiselect(
+            "Columns to keep (order matters)",
+            options=columns,
+            default=preset,
+            help="Only the selected columns will remain; order is preserved as chosen",
+            key="keep_columns_multiselect"
+        )
+        st.session_state['keep_columns_selection'] = selection
+
+        if st.button(
+            "Apply Keep Columns",
+            use_container_width=True,
+            key="keep_columns_apply_btn"
+        ):
+            debug_log("Keep Columns confirmed", "GUI")
+            st.session_state.last_interaction = 'keep_columns'
+
+            if not selection:
+                st.error("❌ Select at least one column to keep.")
+                return
+
+            try:
+                st.session_state.broom.keep_columns(columns=selection)
+            except ValueError as exc:
+                st.error(f"❌ {exc}")
+                return
+
+            sync_history()
+            joined = ", ".join(selection)
+            st.session_state.cleaning_history.append(f"Kept columns {joined}")
+            st.success(f"📌 Retained columns: {joined}")
+            st.rerun()
 
 def _render_column_operations():
     """Render column cleaning operations."""
@@ -158,7 +357,7 @@ def _render_column_operations():
                 )
                 debug_log(f"After operation - Columns: {list(st.session_state.broom.get_df().columns)}", "GUI")
                 sync_history()
-                st.session_state.cleaning_history.append("GUI: Cleaned column names (clean_columns)")
+                st.session_state.cleaning_history.append("Tidied column names")
                 debug_log(f"Synced history - Total operations: {len(st.session_state.cleaning_history)}", "GUI")
                 st.success("📝 Column names cleaned!")
                 st.rerun()
@@ -228,7 +427,7 @@ def _render_row_operations():
                 )
                 debug_log(f"After operation - Sample values: {st.session_state.broom.get_df().iloc[0].to_dict() if len(st.session_state.broom.get_df()) > 0 else 'No data'}", "GUI")
                 sync_history()
-                st.session_state.cleaning_history.append("GUI: Cleaned row data (clean_rows)")
+                st.session_state.cleaning_history.append("Tidied row values")
                 debug_log(f"Synced history - Total operations: {len(st.session_state.cleaning_history)}", "GUI")
                 st.success("📄 Row data cleaned!")
                 st.rerun()

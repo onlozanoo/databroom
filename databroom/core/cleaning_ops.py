@@ -1,5 +1,7 @@
 # databroom/core/cleaning_ops.py
 
+from typing import Iterable, List, Optional
+
 import pandas as pd
 import unicodedata
 import re
@@ -125,6 +127,101 @@ def clean_all(df: pd.DataFrame) -> pd.DataFrame:
     return result_df
 
 
+def rename_column(df: pd.DataFrame, old: str, new: str) -> pd.DataFrame:
+    """Rename a column while validating the existing and target names."""
+
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError("Input must be a pandas DataFrame")
+
+    if not isinstance(old, str) or not old:
+        raise ValueError("Parameter 'old' must be a non-empty string")
+
+    if not isinstance(new, str) or not new:
+        raise ValueError("Parameter 'new' must be a non-empty string")
+
+    if old not in df.columns:
+        raise ValueError(f"Column '{old}' does not exist in the DataFrame")
+
+    if new != old and new in df.columns:
+        raise ValueError(f"Column '{new}' already exists; choose a unique name")
+
+    result_df = df.copy()
+    result_df = result_df.rename(columns={old: new})
+
+    return result_df
+
+
+def _coerce_columns_list(columns: Iterable[str]) -> List[str]:
+    """Normalize iterable of column names into a list of strings."""
+    if columns is None:
+        raise ValueError("Column list cannot be empty")
+
+    if isinstance(columns, str):
+        # Treat comma-separated string as list
+        normalized = [col.strip() for col in columns.split(",") if col.strip()]
+    else:
+        try:
+            iterable = list(columns)
+        except TypeError as exc:
+            raise ValueError("Columns parameter must be an iterable of strings") from exc
+
+        normalized = []
+        for col in iterable:
+            value = str(col).strip()
+            if value:
+                normalized.append(value)
+
+    if not normalized:
+        raise ValueError("Column list cannot be empty")
+    return normalized
+
+
+def reorder_columns(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+    """Reorder columns, keeping unspecified columns appended in their original order."""
+
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError("Input must be a pandas DataFrame")
+
+    desired_order = _coerce_columns_list(columns)
+
+    missing = [col for col in desired_order if col not in df.columns]
+    if missing:
+        raise ValueError(f"Columns not found for reordering: {missing}")
+
+    remaining = [col for col in df.columns if col not in desired_order]
+    new_order = desired_order + remaining
+
+    return df[new_order].copy()
+
+
+def drop_columns(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+    """Drop the specified columns."""
+
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError("Input must be a pandas DataFrame")
+
+    cols_to_drop = _coerce_columns_list(columns)
+    missing = [col for col in cols_to_drop if col not in df.columns]
+    if missing:
+        raise ValueError(f"Columns not found for dropping: {missing}")
+
+    return df.drop(columns=cols_to_drop).copy()
+
+
+def keep_columns(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+    """Keep only the specified columns in the provided order."""
+
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError("Input must be a pandas DataFrame")
+
+    cols_to_keep = _coerce_columns_list(columns)
+    missing = [col for col in cols_to_keep if col not in df.columns]
+    if missing:
+        raise ValueError(f"Columns not found for keeping: {missing}")
+
+    return df[cols_to_keep].copy()
+
+
 def promote_headers(df: pd.DataFrame, row_index: int = 0, drop_promoted_row: bool = True) -> pd.DataFrame:
     """Promote a specific row to become the column headers."""
     
@@ -150,6 +247,6 @@ def promote_headers(df: pd.DataFrame, row_index: int = 0, drop_promoted_row: boo
 
 
 # Legacy functions for backward compatibility
-def standardize_values(df: pd.DataFrame, columns: list = None) -> pd.DataFrame:
+def standardize_values(df: pd.DataFrame, columns: Optional[list[str]] = None) -> pd.DataFrame:
     """Legacy function - Use clean_rows() instead."""
     return clean_rows(df, clean_text=True, remove_accents=True, snakecase=True)

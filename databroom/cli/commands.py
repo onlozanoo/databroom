@@ -82,6 +82,29 @@ def clean_command(
     promote_headers: Annotated[bool, typer.Option("--promote-headers",
                                                  help=r"[bold green]\[NEW][/bold green] Promote first row to become column headers and remove it")] = False,
 
+    # STRUCTURE & COLUMN MANAGEMENT
+    rename_column: Annotated[bool, typer.Option("--rename-column",
+                                                help=r"[bold cyan]\[STRUCTURE][/bold cyan] Rename a column to a new label")] = False,
+    rename_column_old: Annotated[Optional[str], typer.Option("--rename-column-old",
+                                                             help=r"[bold cyan]\[STRUCTURE][/bold cyan] Existing column name to rename")] = None,
+    rename_column_new: Annotated[Optional[str], typer.Option("--rename-column-new",
+                                                             help=r"[bold cyan]\[STRUCTURE][/bold cyan] Target column name")] = None,
+
+    reorder_columns: Annotated[bool, typer.Option("--reorder-columns",
+                                                  help=r"[bold cyan]\[STRUCTURE][/bold cyan] Reorder columns; unspecified columns stay at the end")] = False,
+    reorder_columns_list: Annotated[Optional[str], typer.Option("--reorder-columns-list",
+                                                                help=r"[bold cyan]\[STRUCTURE][/bold cyan] Comma-separated list describing the desired leading column order")] = None,
+
+    drop_columns: Annotated[bool, typer.Option("--drop-columns",
+                                               help=r"[bold cyan]\[STRUCTURE][/bold cyan] Drop selected columns")] = False,
+    drop_columns_list: Annotated[Optional[str], typer.Option("--drop-columns-list",
+                                                             help=r"[bold cyan]\[STRUCTURE][/bold cyan] Comma-separated list of columns to drop")] = None,
+
+    keep_columns: Annotated[bool, typer.Option("--keep-columns",
+                                               help=r"[bold cyan]\[STRUCTURE][/bold cyan] Keep only the listed columns in order")] = False,
+    keep_columns_list: Annotated[Optional[str], typer.Option("--keep-columns-list",
+                                                             help=r"[bold cyan]\[STRUCTURE][/bold cyan] Comma-separated list of columns to retain")] = None,
+
     # PARAMETERS
     empty_threshold: Annotated[float, typer.Option("--empty-threshold",
                                                   help=r"[bold blue]\[PARAMS][/bold blue] Threshold for removing empty columns (0.9 = 90% missing) [dim]default: 0.9[/dim]")] = 0.9,
@@ -179,14 +202,23 @@ def clean_command(
             'normalize_column_names': normalize_column_names,
             'normalize_values': normalize_values,
             'standardize_values': standardize_values,
-            'promote_headers': promote_headers
+            'promote_headers': promote_headers,
+            'rename_column': rename_column,
+            'reorder_columns': reorder_columns,
+            'drop_columns': drop_columns,
+            'keep_columns': keep_columns
         }
 
         operation_params = {
             'remove_empty_cols_threshold': remove_empty_cols_threshold,
             'threshold': remove_empty_cols_threshold,
             'promote_headers_row_index': promote_headers_row_index,
-            'promote_headers_drop_promoted_row': promote_headers_drop_row
+            'promote_headers_drop_promoted_row': promote_headers_drop_row,
+            'rename_column_old': rename_column_old,
+            'rename_column_new': rename_column_new,
+            'reorder_columns_columns': reorder_columns_list,
+            'drop_columns_columns': drop_columns_list,
+            'keep_columns_columns': keep_columns_list
         }
 
         if verbose:

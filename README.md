@@ -283,6 +283,10 @@ generator.export_code('my_cleaning_pipeline.py')
 | **📌 Promote Headers** | `--promote-headers` | **Convert a data row to column headers** |
 | **📋 Clean Columns** | `--clean-columns` | Clean column names: snake_case + remove accents + remove empty |
 | **📊 Clean Rows** | `--clean-rows` | Clean row data: snake_case + remove accents + remove empty |
+| **✏️ Rename Column** | `--rename-column` | Rename a column (pair with `--rename-column-old/--rename-column-new`) |
+| **🔀 Reorder Columns** | `--reorder-columns` | Reorder columns by listing the desired leading order |
+| **🗑️ Drop Columns** | `--drop-columns` | Remove selected columns from the dataset |
+| **📌 Keep Columns** | `--keep-columns` | Retain only the specified columns in the given order |
 
 ### CLI Parameters
 
@@ -296,6 +300,10 @@ generator.export_code('my_cleaning_pipeline.py')
 --promote-headers                    # Convert data row to column headers
 --promote-row-index 1                # Row index to promote (default: 0)
 --keep-promoted-row                  # Keep the promoted row in data
+--rename-column --rename-column-old Producto --rename-column-new Item
+--reorder-columns --reorder-columns-list "id,date,total"
+--drop-columns --drop-columns-list "temp_column,notes"
+--keep-columns --keep-columns-list "id,date,total"
 
 # Advanced Options (disable specific operations)
 --no-snakecase                       # Keep original text case in rows

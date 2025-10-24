@@ -214,3 +214,31 @@ class Broom:
                                        drop_promoted_row=drop_promoted_row)
         debug_log("promote_headers operation completed", "BROOM")
         return self
+
+    def rename_column(self, old: str, new: str):
+        """Rename a column while enforcing uniqueness."""
+        debug_log(f"Broom.rename_column called with params: old={old}, new={new}", "BROOM")
+        self.pipeline.execute_operation('rename_column', old=old, new=new)
+        debug_log("rename_column operation completed", "BROOM")
+        return self
+
+    def reorder_columns(self, columns):
+        """Reorder columns; unspecified columns stay at the end."""
+        debug_log(f"Broom.reorder_columns called with columns: {columns}", "BROOM")
+        self.pipeline.execute_operation('reorder_columns', columns=columns)
+        debug_log("reorder_columns operation completed", "BROOM")
+        return self
+
+    def drop_columns(self, columns):
+        """Drop the specified columns."""
+        debug_log(f"Broom.drop_columns called with columns: {columns}", "BROOM")
+        self.pipeline.execute_operation('drop_columns', columns=columns)
+        debug_log("drop_columns operation completed", "BROOM")
+        return self
+
+    def keep_columns(self, columns):
+        """Keep only the specified columns in order."""
+        debug_log(f"Broom.keep_columns called with columns: {columns}", "BROOM")
+        self.pipeline.execute_operation('keep_columns', columns=columns)
+        debug_log("keep_columns operation completed", "BROOM")
+        return self
