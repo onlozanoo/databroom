@@ -245,7 +245,6 @@ def promote_headers(df: pd.DataFrame, row_index: int = 0, drop_promoted_row: boo
     
     return result_df
 
-
 # Legacy functions for backward compatibility
 def standardize_values(df: pd.DataFrame, columns: Optional[list[str]] = None) -> pd.DataFrame:
     """Legacy function - Use clean_rows() instead."""
