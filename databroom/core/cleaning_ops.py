@@ -20,8 +20,6 @@ def remove_empty_cols(df: pd.DataFrame, threshold: float = 0.9) -> pd.DataFrame:
     
     return cleaned_df
 
-
-
 def remove_empty_rows(df: pd.DataFrame) -> pd.DataFrame:
     """Remove empty rows from a DataFrame."""
     
