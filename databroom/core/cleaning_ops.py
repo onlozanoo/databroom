@@ -20,16 +20,7 @@ def remove_empty_cols(df: pd.DataFrame, threshold: float = 0.9) -> pd.DataFrame:
     
     return cleaned_df
 
-def remove_empty_rows(df: pd.DataFrame) -> pd.DataFrame:
-    """Remove empty rows from a DataFrame."""
-    
-    if not isinstance(df, pd.DataFrame):
-        raise ValueError("Input must be a pandas DataFrame")
-    
-    # Drop rows that are completely empty
-    cleaned_df = df.dropna(axis=0, how='all')
-    
-    return cleaned_df
+
 
 
 def standardize_column_names(df: pd.DataFrame) -> pd.DataFrame:
@@ -45,10 +36,10 @@ def normalize_values(df: pd.DataFrame) -> pd.DataFrame:
     return clean_rows(df, remove_empty=False, clean_text=True, remove_accents=True, snakecase=False)
 
 def clean_columns(df: pd.DataFrame, 
-                 remove_empty: bool = True,
-                 empty_threshold: float = 0.9, 
-                 snake_case: bool = True,
-                 remove_accents: bool = True) -> pd.DataFrame:
+                remove_empty: bool = True,
+                empty_threshold: float = 0.9, 
+                snake_case: bool = True,
+                remove_accents: bool = True) -> pd.DataFrame:
     """Comprehensive column cleaning with all operations enabled by default."""
     
     if not isinstance(df, pd.DataFrame):
@@ -77,10 +68,10 @@ def clean_columns(df: pd.DataFrame,
 
 
 def clean_rows(df: pd.DataFrame,
-              remove_empty: bool = True, 
-              clean_text: bool = True,
-              remove_accents: bool = True,
-              snakecase: bool = True) -> pd.DataFrame:
+            remove_empty: bool = True, 
+            clean_text: bool = True,
+            remove_accents: bool = True,
+            snakecase: bool = True) -> pd.DataFrame:
     """Comprehensive row cleaning with all operations enabled by default."""
     
     if not isinstance(df, pd.DataFrame):
@@ -240,6 +231,34 @@ def promote_headers(df: pd.DataFrame, row_index: int = 0, drop_promoted_row: boo
     # Drop the promoted row if requested
     if drop_promoted_row:
         result_df = result_df.drop(result_df.index[row_index]).reset_index(drop=True)
+    
+    return result_df
+
+
+
+def remove_n_rows(df: pd.DataFrame, n: int, last: bool = False) -> pd.DataFrame:
+    """Remove the first or last n rows."""
+
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError("Input must be a pandas DataFrame")
+
+    if n < 0:
+        raise ValueError("n must be a non-negative integer")
+
+    if last:
+        return df.iloc[:-n].copy()
+    else:
+        return df.iloc[n:].copy()
+
+def remove_empty_rows(df: pd.DataFrame, threshold: float = 0.9) -> pd.DataFrame:
+    """Remove rows that are empty based on a threshold of non-null values."""
+    
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError("Input must be a pandas DataFrame")
+
+    thresh_count = int(threshold * df.shape[1])
+    
+    result_df = df.dropna(axis=0, thresh=thresh_count).reset_index(drop=True)
     
     return result_df
 

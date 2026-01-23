@@ -49,7 +49,9 @@ class CodeGenerator:
             'remove_empty_cols': {
                 'threshold': 0.9
             },
-            'remove_empty_rows': {},
+            'remove_empty_rows': {
+                'threshold': 0.9
+            },
             'standardize_column_names': {},
             'normalize_column_names': {},
             'normalize_values': {},
@@ -104,7 +106,7 @@ class CodeGenerator:
         if isinstance(value, (list, tuple)):
             return tuple(self._freeze_value(item) for item in value)
         return value
-    
+
     def load_history(self, history):
         
         """
@@ -231,7 +233,11 @@ class CodeGenerator:
             return f"select_if(~ mean(is.na(.)) < {na_threshold})"
         
         elif func_name == 'remove_empty_rows':
-            return "filter(!if_all(everything(), is.na))"
+            threshold = params.get('threshold', 0.9)
+            if threshold == 1.0:
+               return "filter(!if_all(everything(), is.na))"
+            else:
+               return f"filter(rowMeans(!is.na(.)) >= {threshold})"
         
         elif func_name == 'standardize_column_names':
             return "clean_names(case = 'snake')"

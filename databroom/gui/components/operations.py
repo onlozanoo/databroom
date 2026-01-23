@@ -401,6 +401,8 @@ def _render_row_operations():
     with st.expander("📄 **Row Operations**", expanded=False):
         st.caption("Clean and standardize row data")
         
+        _render_remove_empty_rows()
+
         col1, col2 = st.columns([3, 1])
         with col1:
             if st.button(
@@ -464,3 +466,35 @@ def _render_row_operations():
                 help="Don't remove empty rows",
                 key="no_empty_rows_check"
             )
+
+def _render_remove_empty_rows():
+    """Render remove empty rows operation."""
+    with st.expander("🗑️ Remove Empty Rows", expanded=False):
+        
+        # Threshold slider
+        threshold = st.slider(
+            "Empty Row Threshold",
+            min_value=0.0,
+            max_value=1.0,
+            value=st.session_state.get('remove_empty_rows_threshold', 0.9),
+            step=0.05,
+            help="Keep rows properly populated (0.9 = keep dense rows, drop sparse ones)",
+            key="remove_empty_rows_slider"
+        )
+        st.session_state['remove_empty_rows_threshold'] = threshold
+
+        if st.button(
+            "Apply Remove Empty Rows",
+            use_container_width=True,
+            key="remove_empty_rows_btn"
+        ):
+            debug_log("Remove Empty Rows clicked", "GUI")
+            st.session_state.last_interaction = 'remove_empty_rows'
+            
+            # Use threshold
+            st.session_state.broom.remove_empty_rows(threshold=threshold)
+            
+            sync_history()
+            st.session_state.cleaning_history.append(f"Removed empty rows (threshold={threshold})")
+            st.success("🗑️ Empty rows removed!")
+            st.rerun()

@@ -4,6 +4,14 @@ from databroom.core.pipeline import CleaningPipeline
 from databroom.core.debug_logger import debug_log
 import pandas as pd
 
+def manejo_errores_csv(cls, file_source, **csv_kwargs):
+    # When file has problems with utf-8 encoding, try to read it with latin-1 encoding
+    try:
+        df = pd.read_csv(file_source, encoding='latin-1', **csv_kwargs)
+        return df
+    except Exception as e:
+        raise ValueError(f"Error loading CSV: {e}")
+
 class Broom:
     def __init__(self, df: pd.DataFrame):
         debug_log(f"Initializing Broom with DataFrame shape: {df.shape}", "BROOM")
@@ -28,7 +36,8 @@ class Broom:
             return cls(df)
         except Exception as e:
             debug_log(f"Error loading CSV: {e}", "BROOM")
-            raise ValueError(f"Error loading CSV: {e}")
+            df = manejo_errores_csv(cls, file_source, **csv_kwargs)
+            return cls(df)
     
     @classmethod
     def from_excel(cls, file_source, sheet_name=0, **excel_kwargs):
@@ -146,11 +155,7 @@ class Broom:
         
         return self
     
-    def remove_empty_rows(self):
-        """Remove empty rows based on a threshold of non-null values."""
-        self.pipeline.execute_operation('remove_empty_rows')
-    
-        return self
+
     
     def standardize_column_names(self):
         """Standardize column names by converting to lowercase and replacing spaces with underscores."""
@@ -174,36 +179,6 @@ class Broom:
         """Standardize values in a specific column."""
         self.pipeline.execute_operation('standardize_values')
 
-        return self
-    
-    # New simplified cleaning methods
-    def clean_columns(self, remove_empty=True, empty_threshold=0.9, snake_case=True, remove_accents=True):
-        """Comprehensive column cleaning with all operations enabled by default."""
-        debug_log(f"Broom.clean_columns called with params: remove_empty={remove_empty}, empty_threshold={empty_threshold}, snake_case={snake_case}, remove_accents={remove_accents}", "BROOM")
-        self.pipeline.execute_operation('clean_columns', 
-                                       remove_empty=remove_empty,
-                                       empty_threshold=empty_threshold, 
-                                       snake_case=snake_case,
-                                       remove_accents=remove_accents)
-        debug_log("clean_columns operation completed", "BROOM")
-        return self
-    
-    def clean_rows(self, remove_empty=True, clean_text=True, remove_accents=True, snakecase=True):
-        """Comprehensive row cleaning with all operations enabled by default."""
-        debug_log(f"Broom.clean_rows called with params: remove_empty={remove_empty}, clean_text={clean_text}, remove_accents={remove_accents}, snakecase={snakecase}", "BROOM")
-        self.pipeline.execute_operation('clean_rows',
-                                       remove_empty=remove_empty,
-                                       clean_text=clean_text,
-                                       remove_accents=remove_accents,
-                                       snakecase=snakecase)
-        debug_log("clean_rows operation completed", "BROOM")
-        return self
-    
-    def clean_all(self):
-        """Ultimate cleaning function - applies both column and row cleaning with all defaults."""
-        debug_log("Broom.clean_all called", "BROOM")
-        self.pipeline.execute_operation('clean_all')
-        debug_log("clean_all operation completed", "BROOM")
         return self
     
     def promote_headers(self, row_index=0, drop_promoted_row=True):
@@ -242,3 +217,48 @@ class Broom:
         self.pipeline.execute_operation('keep_columns', columns=columns)
         debug_log("keep_columns operation completed", "BROOM")
         return self
+
+    def remove_empty_rows(self, threshold: int = 0.9):
+        """Remove rows that are completely empty."""
+        debug_log(f"Broom.remove_empty_rows called with threshold: {threshold}", "BROOM")
+        self.pipeline.execute_operation('remove_empty_rows', threshold=threshold)
+        debug_log("remove_empty_rows operation completed", "BROOM")
+        return self
+
+    def remove_n_rows(self, n: int, last: bool = False):
+        """Remove the first or last n rows."""
+        debug_log(f"Broom.remove_n_rows called with params: n={n}, last={last}", "BROOM")
+        self.pipeline.execute_operation('remove_n_rows', n=n, last=last)
+        debug_log("remove_n_rows operation completed", "BROOM")
+        return self
+
+    # New simplified cleaning methods
+    def clean_columns(self, remove_empty=True, empty_threshold=0.9, snake_case=True, remove_accents=True):
+        """Comprehensive column cleaning with all operations enabled by default."""
+        debug_log(f"Broom.clean_columns called with params: remove_empty={remove_empty}, empty_threshold={empty_threshold}, snake_case={snake_case}, remove_accents={remove_accents}", "BROOM")
+        self.pipeline.execute_operation('clean_columns', 
+                                       remove_empty=remove_empty,
+                                       empty_threshold=empty_threshold, 
+                                       snake_case=snake_case,
+                                       remove_accents=remove_accents)
+        debug_log("clean_columns operation completed", "BROOM")
+        return self
+    
+    def clean_rows(self, remove_empty=True, clean_text=True, remove_accents=True, snakecase=True):
+        """Comprehensive row cleaning with all operations enabled by default."""
+        debug_log(f"Broom.clean_rows called with params: remove_empty={remove_empty}, clean_text={clean_text}, remove_accents={remove_accents}, snakecase={snakecase}", "BROOM")
+        self.pipeline.execute_operation('clean_rows',
+                                       remove_empty=remove_empty,
+                                       clean_text=clean_text,
+                                       remove_accents=remove_accents,
+                                       snakecase=snakecase)
+        debug_log("clean_rows operation completed", "BROOM")
+        return self
+    
+    def clean_all(self):
+        """Ultimate cleaning function - applies both column and row cleaning with all defaults."""
+        debug_log("Broom.clean_all called", "BROOM")
+        self.pipeline.execute_operation('clean_all')
+        debug_log("clean_all operation completed", "BROOM")
+        return self
+    

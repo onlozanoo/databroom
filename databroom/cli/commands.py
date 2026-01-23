@@ -107,7 +107,7 @@ def clean_command(
 
     # PARAMETERS
     empty_threshold: Annotated[float, typer.Option("--empty-threshold",
-                                                  help=r"[bold blue]\[PARAMS][/bold blue] Threshold for removing empty columns (0.9 = 90% missing) [dim]default: 0.9[/dim]")] = 0.9,
+                                                  help=r"[bold blue]\[PARAMS][/bold blue] Threshold for removing empty columns/rows (0.9 = 90% missing) [dim]default: 0.9[/dim]")] = 0.9,
     remove_empty_cols_threshold: Annotated[float, typer.Option("--remove-empty-cols-threshold",
                                                               help=r"[bold yellow]\[LEGACY PARAMS][/bold yellow] Legacy parameter (use --empty-threshold instead)")] = 0.9,
     promote_headers_row_index: Annotated[int, typer.Option("--promote-headers-row-index",
@@ -211,7 +211,7 @@ def clean_command(
 
         operation_params = {
             'remove_empty_cols_threshold': remove_empty_cols_threshold,
-            'threshold': remove_empty_cols_threshold,
+            'threshold': empty_threshold,
             'promote_headers_row_index': promote_headers_row_index,
             'promote_headers_drop_promoted_row': promote_headers_drop_row,
             'rename_column_old': rename_column_old,
