@@ -17,6 +17,70 @@ except ImportError:
 from databroom.core.debug_logger import debug_log
 from databroom.generators.base import CodeGenerator
 
+def _format_operation_summary(operation) -> str:
+    """Format a history operation entry into a human-readable summary.
+    
+    Args:
+        operation: Dictionary containing operation metadata or string (legacy format)
+        
+    Returns:
+        Formatted string summary of the operation
+    """
+    # Handle legacy string format
+    if isinstance(operation, str):
+        return f"✓ {operation}"
+    
+    # Handle dictionary format
+    if not isinstance(operation, dict):
+        return f"✓ {str(operation)}"
+    
+    func_name = operation.get('function', 'Unknown')
+    timestamp = operation.get('timestamp', '')
+    time_only = timestamp.split(' ')[-1] if timestamp else ''
+    
+    # Format function name to be more readable
+    readable_name = func_name.replace('_', ' ').title()
+    
+    # Build parameter string
+    params = []
+    if operation.get('args'):
+        for arg in operation['args']:
+            params.append(str(arg))
+    
+    if operation.get('kwargs'):
+        for key, value in operation['kwargs'].items():
+            if isinstance(value, bool):
+                if value:
+                    params.append(key)
+            elif isinstance(value, (int, float)):
+                params.append(f"{key}: {value}")
+            elif isinstance(value, str):
+                params.append(f"'{value}'")
+            elif isinstance(value, list):
+                if len(value) <= 3:
+                    params.append(f"{key}: {value}")
+                else:
+                    params.append(f"{key}: [{len(value)} items]")
+    
+    param_str = f" ({', '.join(params)})" if params else ""
+    
+    # Format shape change
+    shape_change = operation.get('shape_change', {})
+    before = shape_change.get('before')
+    after = shape_change.get('after')
+    
+    if before and after:
+        shape_str = f" - {before[0]}×{before[1]} → {after[0]}×{after[1]}"
+    else:
+        shape_str = ""
+    
+    # Build final summary
+    summary = f"✓ {readable_name}{param_str}{shape_str}"
+    if time_only:
+        summary += f" - {time_only}"
+    
+    return summary
+
 def render_data_tabs():
     """Render all data display tabs."""
     tab1, tab2, tab3, tab4 = st.tabs(["📊 Current Data", "📝 History & Pipeline", "🔍 Data Info", "💾 Export Code"])
@@ -189,8 +253,10 @@ def _render_history_tab():
     # Current cleaning history
     st.subheader("Current Session History")
     if st.session_state.cleaning_history:
+        # Display simplified summaries
         for operation in st.session_state.cleaning_history:
-            st.markdown(f"- {operation}")
+            summary = _format_operation_summary(operation)
+            st.markdown(f"- {summary}")
 
         # Show technical history from broom
         with st.expander("Technical Details"):

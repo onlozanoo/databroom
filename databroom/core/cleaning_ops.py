@@ -21,8 +21,6 @@ def remove_empty_cols(df: pd.DataFrame, threshold: float = 0.9) -> pd.DataFrame:
     return cleaned_df
 
 
-
-
 def standardize_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """Legacy function - Use clean_columns() instead."""
     return clean_columns(df, remove_empty=False, snake_case=True, remove_accents=False)
@@ -249,6 +247,8 @@ def remove_n_rows(df: pd.DataFrame, n: int, last: bool = False) -> pd.DataFrame:
         return df.iloc[:-n].copy()
     else:
         return df.iloc[n:].copy()
+        
+
 
 def remove_empty_rows(df: pd.DataFrame, threshold: float = 0.9) -> pd.DataFrame:
     """Remove rows that are empty based on a threshold of non-null values."""

@@ -154,9 +154,7 @@ class Broom:
         debug_log("remove_empty_cols operation completed", "BROOM")
         
         return self
-    
 
-    
     def standardize_column_names(self):
         """Standardize column names by converting to lowercase and replacing spaces with underscores."""
         self.pipeline.execute_operation('standardize_column_names')
@@ -261,4 +259,3 @@ class Broom:
         self.pipeline.execute_operation('clean_all')
         debug_log("clean_all operation completed", "BROOM")
         return self
-    
