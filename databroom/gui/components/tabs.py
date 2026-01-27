@@ -7,6 +7,12 @@ import pandas as pd
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
+import streamlit.components.v1 as components
+
+try:
+    from ydata_profiling import ProfileReport
+except ImportError:
+    ProfileReport = None
 
 from databroom.core.debug_logger import debug_log
 from databroom.generators.base import CodeGenerator
@@ -199,20 +205,41 @@ def _render_data_info_tab():
     st.subheader("Data Information")
     current_df = st.session_state.broom.get_df()
     
-    # Data types
-    st.write("**Data Types:**")
-    dtypes_df = pd.DataFrame({
-        'Column': current_df.columns,
-        'Type': current_df.dtypes.astype(str),
-        'Non-Null Count': current_df.count(),
-        'Missing Count': current_df.isnull().sum(),
-        'Missing %': (current_df.isnull().sum() / len(current_df) * 100).round(2)
-    })
-    st.dataframe(dtypes_df, use_container_width=True)
-    
-    # Sample values
-    st.write("**Sample Values:**")
-    st.dataframe(current_df.head(10), use_container_width=True)
+    if ProfileReport is None:
+        st.warning("⚠️ `ydata-profiling` is not installed. Please install it to use automatic EDA features.")
+        st.code("pip install ydata-profiling", language="bash")
+        return
+
+    # Check if report already exists in session
+    if st.session_state.profiling_report:
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.success("✅ EDA Report Generated")
+        with col2:
+            if st.button("🔄 Regenerate Report"):
+                 st.session_state.profiling_report = None
+                 st.rerun()
+             
+        components.html(st.session_state.profiling_report, height=1000, scrolling=True)
+        
+    else:
+
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            if st.button("Generate Data Info", type="primary"):
+                with st.spinner("Generating... This may take a minute for large datasets."):
+                    try:
+                        pr = ProfileReport(current_df, explorative=True,
+                        )#minimal=True)
+                        
+                        pr.config.html.navbar_show=False
+                        #pr.config.html.style.theme="flatly"
+                        
+                        st.session_state.profiling_report = pr.to_html()
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error generating report: {e}")
+                        debug_log(f"Profiling error: {e}", "GUI")
 
 def _render_export_code_tab():
     """Render the code export tab."""

@@ -42,6 +42,11 @@ def initialize_session_state():
     if 'uploaded_pipeline_name' not in st.session_state:
         st.session_state.uploaded_pipeline_name = None
         debug_log("Initialized uploaded_pipeline_name in session state", "GUI")
+
+    # Profiling report storage
+    if 'profiling_report' not in st.session_state:
+        st.session_state.profiling_report = None
+        debug_log("Initialized profiling_report in session state", "GUI")
     
     debug_log(f"Session state summary - Broom: {st.session_state.broom is not None}, "
               f"History length: {len(st.session_state.cleaning_history)}", "GUI")
@@ -54,6 +59,8 @@ def sync_history():
     """Sync session state history with broom pipeline history."""
     if st.session_state.broom:
         st.session_state.cleaning_history = st.session_state.broom.get_history().copy()
+        # Invalidate profiling report when data changes
+        st.session_state.profiling_report = None
         debug_log(f"Synced history - Total operations: {len(st.session_state.cleaning_history)}", "GUI")
 
 def reset_data():
@@ -63,5 +70,7 @@ def reset_data():
     st.session_state.cleaning_history = []
     st.session_state.uploaded_file_name = None
     st.session_state.uploaded_pipeline = None
+    st.session_state.uploaded_pipeline = None
     st.session_state.uploaded_pipeline_name = None
+    st.session_state.profiling_report = None
     debug_log("Reset all data in session state", "GUI")
